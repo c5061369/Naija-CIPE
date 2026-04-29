@@ -1,0 +1,2655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaijaCipe — UI/UX Clickable Mockup</title>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --naija-green: #0B6E4F;
+    --naija-green-dark: #075238;
+    --naija-green-light: #1C8E6A;
+    --naija-gold: #E3A71C;
+    --naija-gold-dark: #B8851A;
+    --naija-cream: #FFF8E7;
+    --naija-red: #D64545;
+    --naija-dark: #1A2E22;
+    --naija-charcoal: #2B2B2B;
+    --naija-gray-100: #F8F6F1;
+    --naija-gray-200: #EAE6DD;
+  }
+
+  * { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--naija-gray-100);
+    color: var(--naija-charcoal);
+  }
+
+  .display-font, h1, h2, h3, .brand-logo {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  /* ---------- Mockup Control Bar ---------- */
+  .mockup-controls {
+    position: sticky; top: 0; z-index: 1060;
+    background: var(--naija-dark);
+    color: #fff; padding: 10px 16px;
+    font-size: 13px;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    border-bottom: 3px solid var(--naija-gold);
+  }
+  .mockup-controls strong { color: var(--naija-gold); letter-spacing: .5px; }
+  .mockup-controls .chip {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    padding: 4px 10px; border-radius: 20px;
+    cursor: pointer; color: #fff; text-decoration: none;
+    transition: all .15s;
+    font-size: 12px;
+  }
+  .mockup-controls .chip:hover { background: var(--naija-gold); color: var(--naija-dark); border-color: var(--naija-gold); }
+  .mockup-controls .chip.active { background: var(--naija-gold); color: var(--naija-dark); border-color: var(--naija-gold); font-weight: 600; }
+
+  /* ---------- Navbar ---------- */
+  .navbar-naija {
+    background: #fff !important;
+    border-bottom: 1px solid var(--naija-gray-200);
+    padding: .75rem 0;
+  }
+  .brand-logo {
+    font-weight: 800; font-size: 1.5rem;
+    color: var(--naija-green) !important;
+    letter-spacing: -.5px;
+  }
+  .brand-logo .dot { color: var(--naija-gold); }
+  .navbar-naija .nav-link {
+    color: var(--naija-charcoal) !important;
+    font-weight: 500; padding: .5rem 1rem !important;
+    font-size: .95rem;
+  }
+  .navbar-naija .nav-link:hover { color: var(--naija-green) !important; }
+  .navbar-naija .nav-link.active { color: var(--naija-green) !important; font-weight: 600; }
+
+  /* ---------- Buttons ---------- */
+  .btn-naija {
+    background: var(--naija-green);
+    color: #fff; border: none; font-weight: 600;
+    padding: .65rem 1.4rem; border-radius: 8px;
+    transition: all .15s;
+  }
+  .btn-naija:hover { background: var(--naija-green-dark); color: #fff; transform: translateY(-1px); }
+  .btn-naija-outline {
+    background: #fff; color: var(--naija-green);
+    border: 2px solid var(--naija-green); font-weight: 600;
+    padding: .55rem 1.3rem; border-radius: 8px;
+    transition: all .15s;
+  }
+  .btn-naija-outline:hover { background: var(--naija-green); color: #fff; }
+  .btn-gold {
+    background: var(--naija-gold); color: var(--naija-dark);
+    border: none; font-weight: 600; padding: .65rem 1.4rem; border-radius: 8px;
+  }
+  .btn-gold:hover { background: var(--naija-gold-dark); color: #fff; }
+
+  /* ---------- Screens ---------- */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* Screen label */
+  .screen-label {
+    position: fixed; bottom: 20px; right: 20px; z-index: 1050;
+    background: var(--naija-dark); color: var(--naija-gold);
+    padding: 8px 14px; border-radius: 20px; font-size: 12px;
+    font-weight: 600; letter-spacing: .5px; text-transform: uppercase;
+    box-shadow: 0 4px 18px rgba(0,0,0,.2);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    background:
+      linear-gradient(135deg, rgba(11,110,79,.94) 0%, rgba(7,82,56,.9) 100%),
+      radial-gradient(circle at 20% 30%, rgba(227,167,28,.4) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(214,69,69,.3) 0%, transparent 50%);
+    color: #fff; padding: 6rem 0 7rem;
+    position: relative; overflow: hidden;
+  }
+  .hero h1 { font-size: 3.8rem; font-weight: 800; letter-spacing: -1.5px; line-height: 1.1; }
+  .hero p.lead { font-size: 1.2rem; opacity: .92; max-width: 540px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(227,167,28,.2); color: var(--naija-gold);
+    padding: 6px 14px; border-radius: 30px; font-size: .85rem;
+    font-weight: 600; border: 1px solid rgba(227,167,28,.4); margin-bottom: 1.5rem;
+  }
+  .hero-image-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+    padding: 1rem;
+  }
+  .hero-tile {
+    aspect-ratio: 1/1.1; border-radius: 16px;
+    display: flex; align-items: flex-end; padding: 14px;
+    color: #fff; font-weight: 700; font-size: .95rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,.25);
+    text-shadow: 0 2px 8px rgba(0,0,0,.5);
+  }
+  .tile-jollof { background: linear-gradient(135deg, #D64545, #8B2525); transform: translateY(10px); }
+  .tile-egusi  { background: linear-gradient(135deg, #5A8C3A, #2F5820); transform: translateY(-20px); }
+  .tile-suya   { background: linear-gradient(135deg, #8B4513, #4A2610); transform: translateY(20px); }
+  .tile-chinchin { background: linear-gradient(135deg, #E3A71C, #B8851A); transform: translateY(-10px); }
+
+  /* ---------- Recipe Cards ---------- */
+  .recipe-card {
+    background: #fff; border-radius: 14px; overflow: hidden;
+    border: 1px solid var(--naija-gray-200);
+    transition: all .2s; height: 100%;
+    display: flex; flex-direction: column;
+  }
+  .recipe-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,.08); cursor: pointer; }
+  .recipe-card .img-placeholder {
+    height: 200px; position: relative;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 12px;
+  }
+  .recipe-card .fav-btn {
+    background: rgba(255,255,255,.95); border: none; width: 38px; height: 38px;
+    border-radius: 50%; color: var(--naija-red); font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  .recipe-card .time-badge {
+    background: rgba(0,0,0,.6); color: #fff; font-size: .75rem;
+    padding: 4px 10px; border-radius: 20px; font-weight: 500;
+  }
+  .recipe-card .body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+  .recipe-card .category-tag {
+    color: var(--naija-gold-dark); font-size: .75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .8px;
+  }
+  .recipe-card h5 { font-size: 1.1rem; font-weight: 700; margin: 4px 0 8px; color: var(--naija-dark); }
+  .recipe-card .card-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: .85rem; color: #6c757d; margin-top: auto; padding-top: 10px;
+    border-top: 1px solid var(--naija-gray-200);
+  }
+  .stars { color: var(--naija-gold); }
+
+  /* Recipe image backgrounds (CSS only) */
+  .img-jollof   { background: linear-gradient(135deg, #D64545 0%, #8B2525 60%, #5A1515 100%); }
+  .img-egusi    { background: linear-gradient(135deg, #7FAE4F, #4A7030 60%, #2B4A18 100%); }
+  .img-suya     { background: linear-gradient(135deg, #B8691F, #6B3A10 100%); }
+  .img-chinchin { background: linear-gradient(135deg, #E8B84A, #9C6F15 100%); }
+  .img-pepper   { background: linear-gradient(135deg, #E85A4F, #9C2919 100%); }
+  .img-puffpuff { background: linear-gradient(135deg, #D89B5C, #8B5A2B 100%); }
+  .img-moimoi   { background: linear-gradient(135deg, #D97706, #78350F 100%); }
+  .img-efo      { background: linear-gradient(135deg, #3F6E2E, #1F3A15 100%); }
+  .img-akara    { background: linear-gradient(135deg, #CA8A04, #713F12 100%); }
+  .img-zobo     { background: linear-gradient(135deg, #BE123C, #4C0519 100%); }
+  .img-bananabread { background: linear-gradient(135deg, #D4A373, #8B5E34 100%); }
+  .img-okra     { background: linear-gradient(135deg, #4D7C0F, #1A2E05 100%); }
+
+  .img-placeholder::after {
+    content: attr(data-label); position: absolute; bottom: 12px; left: 14px;
+    color: #fff; font-weight: 700; font-size: 1.15rem; text-shadow: 0 2px 6px rgba(0,0,0,.6);
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* ---------- Category Pills ---------- */
+  .category-tile {
+    background: #fff; border: 1px solid var(--naija-gray-200);
+    padding: 24px 16px; border-radius: 14px; text-align: center;
+    transition: all .2s; cursor: pointer;
+  }
+  .category-tile:hover { border-color: var(--naija-green); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(11,110,79,.1); }
+  .category-tile i { font-size: 2rem; color: var(--naija-green); display: block; margin-bottom: 8px; }
+  .category-tile h6 { margin: 0; font-weight: 600; color: var(--naija-dark); }
+  .category-tile small { color: #6c757d; font-size: .78rem; }
+
+  /* ---------- Auth Cards ---------- */
+  .auth-wrap {
+    min-height: calc(100vh - 200px);
+    background: linear-gradient(135deg, var(--naija-gray-100) 0%, var(--naija-cream) 100%);
+    padding: 3rem 0; display: flex; align-items: center;
+  }
+  .auth-card {
+    background: #fff; border-radius: 20px; padding: 2.5rem;
+    box-shadow: 0 12px 40px rgba(0,0,0,.06);
+    max-width: 460px; margin: auto;
+  }
+  .auth-card h2 { color: var(--naija-dark); font-weight: 700; }
+  .form-control, .form-select {
+    border-radius: 8px; border: 1.5px solid var(--naija-gray-200);
+    padding: .7rem .9rem; font-size: .95rem;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: var(--naija-green);
+    box-shadow: 0 0 0 3px rgba(11,110,79,.15);
+  }
+  .form-label { font-weight: 500; color: var(--naija-dark); font-size: .9rem; }
+  .demo-credentials {
+    background: var(--naija-cream); border: 1px dashed var(--naija-gold-dark);
+    padding: 12px 14px; border-radius: 8px; font-size: .82rem; margin-top: 1rem;
+  }
+
+  /* ---------- Footer ---------- */
+  .footer-naija {
+    background: var(--naija-dark); color: #CDD6CC;
+    padding: 3rem 0 1.5rem; margin-top: 4rem;
+  }
+  .footer-naija h6 { color: #fff; font-weight: 600; margin-bottom: 1rem; }
+  .footer-naija a { color: #CDD6CC; text-decoration: none; font-size: .9rem; }
+  .footer-naija a:hover { color: var(--naija-gold); }
+  .footer-naija .copy { border-top: 1px solid rgba(255,255,255,.1); padding-top: 1.2rem; margin-top: 2rem; font-size: .85rem; }
+
+  /* ---------- Browse sidebar ---------- */
+  .filter-sidebar {
+    background: #fff; border-radius: 14px; padding: 1.5rem;
+    border: 1px solid var(--naija-gray-200); position: sticky; top: 90px;
+  }
+  .filter-sidebar h6 { font-weight: 700; color: var(--naija-dark); text-transform: uppercase; font-size: .8rem; letter-spacing: 1px; }
+
+  /* ---------- Recipe Detail ---------- */
+  .recipe-hero {
+    height: 380px; border-radius: 16px; position: relative;
+    display: flex; align-items: flex-end; padding: 2rem;
+    color: #fff; overflow: hidden;
+  }
+  .recipe-hero::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,.1) 60%, transparent 100%);
+  }
+  .recipe-hero > div { position: relative; z-index: 2; }
+  .recipe-hero h1 { font-size: 2.8rem; font-weight: 800; margin: 0; text-shadow: 0 2px 12px rgba(0,0,0,.4); }
+  .meta-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.18); backdrop-filter: blur(8px);
+    padding: 6px 14px; border-radius: 20px; font-size: .9rem;
+    margin-right: 8px;
+  }
+
+  .nav-tabs-naija { border-bottom: 2px solid var(--naija-gray-200); gap: 8px; }
+  .nav-tabs-naija .nav-link {
+    border: none; color: #6c757d; font-weight: 600;
+    padding: 12px 20px; border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+  }
+  .nav-tabs-naija .nav-link.active {
+    background: transparent; color: var(--naija-green);
+    border-bottom-color: var(--naija-green);
+  }
+
+  .ingredient-item {
+    display: flex; align-items: center; padding: 10px 0;
+    border-bottom: 1px solid var(--naija-gray-200);
+  }
+  .ingredient-item:last-child { border-bottom: none; }
+  .ingredient-qty { color: var(--naija-gold-dark); font-weight: 700; min-width: 90px; }
+
+  .step-card {
+    background: #fff; border-radius: 12px; padding: 1.2rem;
+    margin-bottom: 12px; display: flex; gap: 14px;
+    border-left: 4px solid var(--naija-green);
+  }
+  .step-num {
+    background: var(--naija-green); color: #fff; width: 32px; height: 32px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; flex-shrink: 0;
+  }
+
+  .review-item {
+    border-bottom: 1px solid var(--naija-gray-200);
+    padding: 1.2rem 0;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .review-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--naija-green); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+
+  .video-placeholder {
+    background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
+    border-radius: 12px; aspect-ratio: 16/9;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; position: relative; overflow: hidden;
+  }
+  .video-placeholder::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(214,69,69,.25) 0%, transparent 40%),
+      radial-gradient(circle at 70% 60%, rgba(227,167,28,.2) 0%, transparent 40%);
+  }
+  .play-btn {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--naija-red); display: flex;
+    align-items: center; justify-content: center;
+    font-size: 2rem; color: #fff; z-index: 2;
+    box-shadow: 0 8px 24px rgba(214,69,69,.5);
+  }
+
+  /* ---------- Dashboard ---------- */
+  .stat-card {
+    background: #fff; border-radius: 14px; padding: 1.5rem;
+    border: 1px solid var(--naija-gray-200);
+  }
+  .stat-card .stat-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; margin-bottom: 12px;
+  }
+  .stat-card h3 { font-size: 2rem; font-weight: 800; margin: 0; color: var(--naija-dark); }
+  .stat-card small { color: #6c757d; }
+
+  /* ---------- Meal Planner ---------- */
+  .planner-grid {
+    display: grid;
+    grid-template-columns: 120px repeat(7, 1fr);
+    gap: 8px; background: var(--naija-gray-200); padding: 8px; border-radius: 14px;
+  }
+  .planner-cell {
+    background: #fff; padding: 10px; min-height: 110px;
+    border-radius: 8px; font-size: .8rem;
+  }
+  .planner-head {
+    background: var(--naija-dark); color: #fff;
+    text-align: center; padding: 10px; border-radius: 8px;
+    font-weight: 600; font-size: .85rem;
+  }
+  .planner-label {
+    background: var(--naija-green); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; font-weight: 600; font-size: .85rem;
+  }
+  .planned-meal {
+    background: var(--naija-cream);
+    padding: 6px 8px; border-radius: 6px; margin-bottom: 6px;
+    font-size: .78rem; border-left: 3px solid var(--naija-gold);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .planned-meal .remove-x { color: #aaa; cursor: pointer; }
+  .planned-meal .remove-x:hover { color: var(--naija-red); }
+  .empty-slot {
+    border: 1.5px dashed var(--naija-gray-200); color: #aaa;
+    padding: 6px; border-radius: 6px; text-align: center; cursor: pointer;
+    font-size: .75rem; margin-bottom: 6px;
+  }
+  .empty-slot:hover { border-color: var(--naija-green); color: var(--naija-green); }
+
+  /* ---------- Admin ---------- */
+  .admin-sidebar {
+    background: var(--naija-dark); color: #fff;
+    border-radius: 14px; padding: 1rem; min-height: 600px;
+  }
+  .admin-sidebar .admin-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; color: #B8BFB5; text-decoration: none;
+    border-radius: 8px; margin-bottom: 4px; font-size: .92rem;
+  }
+  .admin-sidebar .admin-link:hover, .admin-sidebar .admin-link.active {
+    background: rgba(227,167,28,.15); color: var(--naija-gold);
+  }
+  .admin-table { background: #fff; border-radius: 14px; overflow: hidden; }
+  .admin-table th {
+    background: var(--naija-gray-100); color: var(--naija-dark);
+    font-size: .8rem; text-transform: uppercase; letter-spacing: .5px;
+    font-weight: 700; padding: 14px; border: none;
+  }
+  .admin-table td { padding: 14px; border-top: 1px solid var(--naija-gray-200); vertical-align: middle; }
+  .admin-table .thumb {
+    width: 48px; height: 48px; border-radius: 8px; flex-shrink: 0;
+  }
+  .action-icon {
+    width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--naija-gray-200);
+    background: #fff; display: inline-flex; align-items: center; justify-content: center;
+    color: #6c757d; transition: all .15s;
+  }
+  .action-icon:hover.edit { border-color: var(--naija-green); color: var(--naija-green); }
+  .action-icon:hover.delete { border-color: var(--naija-red); color: var(--naija-red); }
+
+  /* ---------- How it works ---------- */
+  .howit-card {
+    text-align: center; padding: 2rem 1rem;
+  }
+  .howit-num {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: var(--naija-cream); color: var(--naija-green);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem; font-size: 1.5rem; font-weight: 800;
+    font-family: 'Playfair Display', serif;
+    border: 2px solid var(--naija-gold);
+  }
+
+  /* Utility */
+  .bg-cream { background: var(--naija-cream); }
+  .text-naija-green { color: var(--naija-green); }
+  .badge-diff-easy { background: #DCF4E8; color: #075238; }
+  .badge-diff-med { background: #FFF0D1; color: #B8851A; }
+  .badge-diff-hard { background: #FFE2E2; color: #9C2919; }
+  .form-wrap { background: #fff; border-radius: 14px; padding: 2rem; border: 1px solid var(--naija-gray-200); }
+
+  /* Smaller screens */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 2.4rem; }
+    .recipe-hero h1 { font-size: 1.8rem; }
+    .planner-grid { grid-template-columns: 80px repeat(7, 1fr); font-size: .7rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================================================= -->
+<!-- MOCKUP CONTROL BAR                                       -->
+<!-- ======================================================= -->
+<div class="mockup-controls">
+  <strong>NaijaCipe</strong>
+  <span class="text-white-50">UI/UX Prototype — click any screen:</span>
+  <a class="chip active" data-go="landing">1. Landing</a>
+  <a class="chip" data-go="register">2. Register</a>
+  <a class="chip" data-go="login">3. Login</a>
+  <a class="chip" data-go="browse">4. Browse</a>
+  <a class="chip" data-go="detail">5. Recipe Detail</a>
+  <a class="chip" data-go="dashboard">6. Dashboard</a>
+  <a class="chip" data-go="favourites">7. Favourites</a>
+  <a class="chip" data-go="myreviews">8. My Reviews</a>
+  <a class="chip" data-go="usersettings">9. Settings</a>
+  <a class="chip" data-go="admin">10. Admin Panel</a>
+  <a class="chip" data-go="addrecipe">11. Add / Edit Recipe</a>
+  <a class="chip" data-go="stores">12. Sheffield Stores</a>
+  <a class="chip" data-go="about">13. About</a>
+  <a class="chip" data-go="notfound">14. 404</a>
+</div>
+
+<!-- ======================================================= -->
+<!-- NAVBAR (shared across screens)                           -->
+<!-- ======================================================= -->
+<nav class="navbar navbar-expand-lg navbar-naija" id="mainNav">
+  <div class="container">
+    <a class="brand-logo" data-go="landing">Naija<span class="dot">.</span>Cipe</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navContent">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" data-go="landing"><i class="bi bi-house-door"></i> Home</a></li>
+        <li class="nav-item"><a class="nav-link" data-go="browse"><i class="bi bi-grid"></i> Recipes</a></li>
+        <li class="nav-item" data-auth="yes"><a class="nav-link" data-go="favourites"><i class="bi bi-heart"></i> Favourites</a></li>
+        <li class="nav-item" data-auth="yes"><a class="nav-link" data-go="myreviews"><i class="bi bi-chat-dots"></i> My Reviews</a></li>
+        <li class="nav-item"><a class="nav-link" data-go="stores"><i class="bi bi-shop"></i> Sheffield Stores</a></li>
+        <li class="nav-item"><a class="nav-link" data-go="about"><i class="bi bi-info-circle"></i> About</a></li>
+      </ul>
+      <div class="d-flex gap-2" id="authButtons">
+        <a class="btn btn-naija-outline btn-sm" data-go="login">Login</a>
+        <a class="btn btn-naija btn-sm" data-go="register">Sign up</a>
+      </div>
+      <div class="d-flex gap-2 align-items-center d-none" id="userButtons">
+        <a class="nav-link position-relative" data-go="dashboard">
+          <i class="bi bi-person-circle fs-5"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark" style="font-size:.6rem;">3</span>
+        </a>
+        <button class="btn btn-naija btn-sm" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ======================================================= -->
+<!-- SCREEN 1: LANDING                                        -->
+<!-- ======================================================= -->
+<section class="screen active" data-screen="landing">
+  <div class="hero">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <span class="hero-badge"><i class="bi bi-stars"></i> 200+ Authentic Nigerian Recipes</span>
+          <h1>Every great <em style="color:var(--naija-gold);">Naija</em> meal starts with a recipe.</h1>
+          <p class="lead mt-3">From Jollof wars to Egusi nights — NaijaCipe is your kitchen companion for authentic Nigerian cooking. Save favourites, plan your week, and watch video guides from home cooks across Nigeria.</p>
+          <div class="mt-4 d-flex gap-2 flex-wrap">
+            <a class="btn btn-gold btn-lg px-4" data-go="browse"><i class="bi bi-egg-fried me-2"></i>Browse Recipes</a>
+            <a class="btn btn-naija-outline btn-lg px-4" style="background:transparent; color:#fff; border-color:#fff;" data-go="register">Get Started — Free</a>
+          </div>
+          <div class="d-flex gap-4 mt-4 pt-3" style="border-top:1px solid rgba(255,255,255,.15);">
+            <div><strong class="display-font fs-3">200+</strong><br><small class="text-white-50">Recipes</small></div>
+            <div><strong class="display-font fs-3">12</strong><br><small class="text-white-50">Categories</small></div>
+            <div><strong class="display-font fs-3">5k+</strong><br><small class="text-white-50">Home cooks</small></div>
+          </div>
+        </div>
+        <div class="col-lg-6 d-none d-lg-block">
+          <div class="hero-image-grid">
+            <div class="hero-tile tile-jollof">Jollof Rice</div>
+            <div class="hero-tile tile-egusi">Egusi Soup</div>
+            <div class="hero-tile tile-suya">Suya</div>
+            <div class="hero-tile tile-chinchin">Chin Chin</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured -->
+  <div class="container py-5">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <small class="text-naija-green fw-bold text-uppercase" style="letter-spacing:2px;">Trending this week</small>
+        <h2 class="mt-1">Featured Recipes</h2>
+      </div>
+      <a class="btn btn-naija-outline" data-go="browse">View all <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <div class="row g-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="recipe-card" data-go="detail">
+          <div class="img-placeholder img-jollof" data-label="Jollof Rice">
+            <button class="fav-btn"><i class="bi bi-heart"></i></button>
+            <span class="time-badge"><i class="bi bi-clock"></i> 45 min</span>
+          </div>
+          <div class="body">
+            <span class="category-tag">Rice Dishes</span>
+            <h5>Classic Nigerian Jollof Rice</h5>
+            <div class="card-meta">
+              <span class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i> 4.9</span>
+              <span class="badge badge-diff-med">Medium</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="recipe-card" data-go="detail">
+          <div class="img-placeholder img-egusi" data-label="Egusi Soup">
+            <button class="fav-btn"><i class="bi bi-heart-fill"></i></button>
+            <span class="time-badge"><i class="bi bi-clock"></i> 60 min</span>
+          </div>
+          <div class="body">
+            <span class="category-tag">Soups &amp; Stews</span>
+            <h5>Egusi Soup with Pounded Yam</h5>
+            <div class="card-meta">
+              <span class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i> 4.7</span>
+              <span class="badge badge-diff-med">Medium</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="recipe-card" data-go="detail">
+          <div class="img-placeholder img-suya" data-label="Suya">
+            <button class="fav-btn"><i class="bi bi-heart"></i></button>
+            <span class="time-badge"><i class="bi bi-clock"></i> 30 min</span>
+          </div>
+          <div class="body">
+            <span class="category-tag">Grills &amp; BBQ</span>
+            <h5>Spicy Beef Suya Skewers</h5>
+            <div class="card-meta">
+              <span class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i> 4.9</span>
+              <span class="badge badge-diff-easy">Easy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="recipe-card" data-go="detail">
+          <div class="img-placeholder img-chinchin" data-label="Chin Chin">
+            <button class="fav-btn"><i class="bi bi-heart"></i></button>
+            <span class="time-badge"><i class="bi bi-clock"></i> 50 min</span>
+          </div>
+          <div class="body">
+            <span class="category-tag">Snacks</span>
+            <h5>Crunchy Nigerian Chin Chin</h5>
+            <div class="card-meta">
+              <span class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i> 4.3</span>
+              <span class="badge badge-diff-easy">Easy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="bg-cream py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <small class="text-naija-green fw-bold text-uppercase" style="letter-spacing:2px;">Explore</small>
+        <h2 class="mt-1">Browse by Category</h2>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-2 col-6"><div class="category-tile"><i class="bi bi-cup-hot"></i><h6>Soups &amp; Stews</h6><small>42 recipes</small></div></div>
+        <div class="col-md-2 col-6"><div class="category-tile"><i class="bi bi-egg-fried"></i><h6>Rice Dishes</h6><small>28 recipes</small></div></div>
+        <div class="col-md-2 col-6"><div class="category-tile"><i class="bi bi-basket3"></i><h6>Swallow</h6><small>15 recipes</small></div></div>
+        <div class="col-md-2 col-6"><div class="category-tile"><i class="bi bi-cookie"></i><h6>Snacks</h6><small>36 recipes</small></div></div>
+        <div class="col-md-2 col-6"><div class="category-tile"><i class="bi bi-cup-straw"></i><h6>Drinks</h6><small>18 recipes</small></div></div>
+        <div class="col-md-2 col-6"><div class="category-tile"><i class="bi bi-sunrise"></i><h6>Breakfast</h6><small>24 recipes</small></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="container py-5">
+    <div class="text-center mb-5">
+      <small class="text-naija-green fw-bold text-uppercase" style="letter-spacing:2px;">Get cooking in 3 steps</small>
+      <h2 class="mt-1">How NaijaCipe Works</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4"><div class="howit-card">
+        <div class="howit-num">1</div>
+        <h4>Create your account</h4>
+        <p class="text-muted">Sign up in 30 seconds to save recipes, leave reviews, and build your personal collection.</p>
+      </div></div>
+      <div class="col-md-4"><div class="howit-card">
+        <div class="howit-num">2</div>
+        <h4>Discover recipes</h4>
+        <p class="text-muted">Browse by category, search by ingredient, and watch step-by-step YouTube tutorials.</p>
+      </div></div>
+      <div class="col-md-4"><div class="howit-card">
+        <div class="howit-num">3</div>
+        <h4>Save &amp; cook</h4>
+        <p class="text-muted">Favourite the recipes you love, rate them, and come back to your growing personal collection any time.</p>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Sheffield stores teaser -->
+  <div class="container py-5">
+    <div class="form-wrap d-flex align-items-center flex-wrap gap-4" style="background: var(--naija-cream); border-color: var(--naija-gold);">
+      <div class="flex-shrink-0 d-none d-md-flex align-items-center justify-content-center" style="width:84px; height:84px; border-radius:50%; background: var(--naija-green); color:#fff; font-size:2.2rem;">
+        <i class="bi bi-shop"></i>
+      </div>
+      <div class="flex-grow-1" style="min-width:240px;">
+        <h4 class="mb-1">Shopping in Sheffield? We've got you.</h4>
+        <p class="mb-0 text-muted">Browse our community-curated directory of Nigerian &amp; African food stores around Sheffield — from Zaonmart and Nxtion to stalls at Moor Market.</p>
+      </div>
+      <div>
+        <a class="btn btn-naija" data-go="stores"><i class="bi bi-geo-alt-fill"></i> Find local stores</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA band -->
+  <div style="background: var(--naija-dark); color: #fff; padding: 4rem 0;">
+    <div class="container text-center">
+      <h2 class="mb-3" style="color:#fff;">Ready to cook like Mama?</h2>
+      <p class="lead text-white-50 mb-4">Join thousands of home cooks preserving Nigerian food heritage.</p>
+      <a class="btn btn-gold btn-lg px-5" data-go="register">Create your free account</a>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 2: REGISTER                                       -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="register">
+  <div class="auth-wrap">
+    <div class="container">
+      <div class="auth-card">
+        <div class="text-center mb-4">
+          <i class="bi bi-egg-fried" style="font-size: 2.5rem; color: var(--naija-gold);"></i>
+          <h2 class="mt-2">Create your account</h2>
+          <p class="text-muted mb-0">Join NaijaCipe and start collecting recipes.</p>
+        </div>
+        <form onsubmit="event.preventDefault(); goTo('login');">
+          <div class="mb-3">
+            <label class="form-label">Full name</label>
+            <input type="text" class="form-control" placeholder="Adaeze Okoro" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-control" placeholder="adaeze_cooks" required>
+            <small class="text-muted">3–20 characters, letters and numbers only</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" placeholder="you@example.com" required>
+          </div>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">Password</label>
+              <input type="password" class="form-control" placeholder="••••••••" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">Confirm password</label>
+              <input type="password" class="form-control" placeholder="••••••••" required>
+            </div>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="terms" required>
+            <label class="form-check-label" for="terms" style="font-size:.88rem;">
+              I agree to the <a href="#" style="color:var(--naija-green);">Terms</a> and <a href="#" style="color:var(--naija-green);">Privacy Policy</a>
+            </label>
+          </div>
+          <button class="btn btn-naija w-100 py-2">Create Account</button>
+          <p class="text-center mt-3 mb-0">
+            <small>Already have an account? <a data-go="login" style="color:var(--naija-green); font-weight:600; cursor:pointer;">Log in</a></small>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 3: LOGIN                                          -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="login">
+  <div class="auth-wrap">
+    <div class="container">
+      <div class="auth-card">
+        <div class="text-center mb-4">
+          <i class="bi bi-person-circle" style="font-size: 2.5rem; color: var(--naija-green);"></i>
+          <h2 class="mt-2">Welcome back</h2>
+          <p class="text-muted mb-0">Log in to your NaijaCipe account.</p>
+        </div>
+        <form onsubmit="event.preventDefault(); loginAs('user');">
+          <div class="mb-3">
+            <label class="form-label">Username or email</label>
+            <input type="text" class="form-control" placeholder="adaeze_cooks" value="demo_user" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label d-flex justify-content-between">
+              Password
+              <a href="#" style="font-size:.85rem; color: var(--naija-green);">Forgot?</a>
+            </label>
+            <input type="password" class="form-control" placeholder="••••••••" value="demo1234" required>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="remember">
+            <label class="form-check-label" for="remember" style="font-size:.88rem;">Remember me for 30 days</label>
+          </div>
+          <button class="btn btn-naija w-100 py-2">Log in</button>
+
+          <div class="demo-credentials">
+            <strong><i class="bi bi-info-circle"></i> Demo credentials for markers:</strong><br>
+            User: <code>demo_user / demo1234</code> &middot;
+            Admin: <code>admin / admin1234</code>
+            <div class="mt-2 d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="loginAs('user')">Login as User</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="loginAs('admin')">Login as Admin</button>
+            </div>
+          </div>
+
+          <p class="text-center mt-3 mb-0">
+            <small>New to NaijaCipe? <a data-go="register" style="color:var(--naija-green); font-weight:600; cursor:pointer;">Create account</a></small>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 4: BROWSE                                         -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="browse">
+  <div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+      <ol class="breadcrumb" style="font-size:.88rem;">
+        <li class="breadcrumb-item"><a data-go="landing" style="color:var(--naija-green);">Home</a></li>
+        <li class="breadcrumb-item active">Recipes</li>
+      </ol>
+    </nav>
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div>
+        <h2 class="mb-1">All Recipes</h2>
+        <small class="text-muted">Showing 1–12 of 214 recipes</small>
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        <span class="text-muted small">Sort:</span>
+        <select class="form-select form-select-sm" style="width:auto;">
+          <option>Most popular</option>
+          <option>Newest first</option>
+          <option>Highest rated</option>
+          <option>Quickest to cook</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Sidebar -->
+      <div class="col-lg-3">
+        <div class="filter-sidebar">
+          <h6 class="mb-3">Search</h6>
+          <div class="input-group mb-4">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" placeholder="Jollof, egusi...">
+          </div>
+
+          <h6>Category</h6>
+          <div class="mb-4">
+            <div class="form-check"><input class="form-check-input" type="checkbox" checked id="c1"><label for="c1" class="form-check-label">Soups &amp; Stews (42)</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="c2"><label for="c2" class="form-check-label">Rice Dishes (28)</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="c3"><label for="c3" class="form-check-label">Swallow (15)</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" checked id="c4"><label for="c4" class="form-check-label">Snacks (36)</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="c5"><label for="c5" class="form-check-label">Drinks (18)</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="c6"><label for="c6" class="form-check-label">Breakfast (24)</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="c7"><label for="c7" class="form-check-label">Grills &amp; BBQ (12)</label></div>
+          </div>
+
+          <h6>Difficulty</h6>
+          <div class="mb-4">
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="d1"><label for="d1" class="form-check-label">Easy</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="d2"><label for="d2" class="form-check-label">Medium</label></div>
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="d3"><label for="d3" class="form-check-label">Hard</label></div>
+          </div>
+
+          <h6>Total time</h6>
+          <div class="mb-4">
+            <input type="range" class="form-range" min="10" max="180" value="90">
+            <div class="d-flex justify-content-between"><small>10 min</small><small>3 hrs</small></div>
+          </div>
+
+          <button class="btn btn-naija w-100">Apply Filters</button>
+          <button class="btn btn-link w-100 mt-2" style="color:#6c757d; font-size:.85rem;">Clear all</button>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div class="col-lg-9">
+        <div class="row g-3">
+          <!-- 12 cards -->
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-jollof" data-label="Jollof Rice"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">45 min</span></div>
+            <div class="body"><span class="category-tag">Rice Dishes</span><h5>Classic Jollof Rice</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.9 (128)</span><span class="badge badge-diff-med">Medium</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-egusi" data-label="Egusi Soup"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">60 min</span></div>
+            <div class="body"><span class="category-tag">Soups</span><h5>Egusi Soup</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.7 (94)</span><span class="badge badge-diff-med">Medium</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-suya" data-label="Suya"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">30 min</span></div>
+            <div class="body"><span class="category-tag">Grills</span><h5>Spicy Beef Suya</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.9 (210)</span><span class="badge badge-diff-easy">Easy</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-pepper" data-label="Pepper Soup"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">40 min</span></div>
+            <div class="body"><span class="category-tag">Soups</span><h5>Catfish Pepper Soup</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.6 (72)</span><span class="badge badge-diff-easy">Easy</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-chinchin" data-label="Chin Chin"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">50 min</span></div>
+            <div class="body"><span class="category-tag">Snacks</span><h5>Crunchy Chin Chin</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.3 (56)</span><span class="badge badge-diff-easy">Easy</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-puffpuff" data-label="Puff Puff"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">35 min</span></div>
+            <div class="body"><span class="category-tag">Snacks</span><h5>Fluffy Puff Puff</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.8 (183)</span><span class="badge badge-diff-easy">Easy</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-moimoi" data-label="Moi Moi"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">75 min</span></div>
+            <div class="body"><span class="category-tag">Breakfast</span><h5>Steamed Moi Moi</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.5 (64)</span><span class="badge badge-diff-med">Medium</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-efo" data-label="Efo Riro"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">50 min</span></div>
+            <div class="body"><span class="category-tag">Soups</span><h5>Efo Riro</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.7 (89)</span><span class="badge badge-diff-med">Medium</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-akara" data-label="Akara"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">30 min</span></div>
+            <div class="body"><span class="category-tag">Breakfast</span><h5>Akara (Bean Cakes)</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.6 (71)</span><span class="badge badge-diff-easy">Easy</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-zobo" data-label="Zobo Drink"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">25 min</span></div>
+            <div class="body"><span class="category-tag">Drinks</span><h5>Zobo Hibiscus Drink</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.4 (48)</span><span class="badge badge-diff-easy">Easy</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-bananabread" data-label="Banana Bread"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">70 min</span></div>
+            <div class="body"><span class="category-tag">Snacks</span><h5>Banana Nut Bread</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.2 (38)</span><span class="badge badge-diff-easy">Easy</span></div></div>
+          </div></div>
+          <div class="col-md-4 col-sm-6"><div class="recipe-card" data-go="detail">
+            <div class="img-placeholder img-okra" data-label="Okra Soup"><button class="fav-btn"><i class="bi bi-heart"></i></button><span class="time-badge">45 min</span></div>
+            <div class="body"><span class="category-tag">Soups</span><h5>Okra Soup (Draw Soup)</h5>
+              <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.5 (55)</span><span class="badge badge-diff-easy">Easy</span></div></div>
+          </div></div>
+        </div>
+
+        <!-- Pagination -->
+        <nav class="mt-5">
+          <ul class="pagination justify-content-center">
+            <li class="page-item disabled"><a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a></li>
+            <li class="page-item active"><a class="page-link" style="background:var(--naija-green);border-color:var(--naija-green);" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">...</a></li>
+            <li class="page-item"><a class="page-link" href="#">18</a></li>
+            <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 5: RECIPE DETAIL                                  -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="detail">
+  <div class="container py-4">
+    <nav class="mb-3">
+      <ol class="breadcrumb" style="font-size:.88rem;">
+        <li class="breadcrumb-item"><a data-go="landing" style="color:var(--naija-green);">Home</a></li>
+        <li class="breadcrumb-item"><a data-go="browse" style="color:var(--naija-green);">Recipes</a></li>
+        <li class="breadcrumb-item">Soups &amp; Stews</li>
+        <li class="breadcrumb-item active">Egusi Soup</li>
+      </ol>
+    </nav>
+
+    <div class="recipe-hero img-egusi">
+      <div>
+        <span class="badge bg-warning text-dark mb-2">SOUPS &amp; STEWS</span>
+        <h1>Egusi Soup with Pounded Yam</h1>
+        <div class="mt-3">
+          <span class="meta-pill"><i class="bi bi-star-fill text-warning"></i> 4.7 (94 reviews)</span>
+          <span class="meta-pill"><i class="bi bi-clock"></i> 60 min</span>
+          <span class="meta-pill"><i class="bi bi-people"></i> Serves 6</span>
+          <span class="meta-pill"><i class="bi bi-fire"></i> Medium</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-3">
+      <div class="col-lg-8">
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <button class="btn btn-naija"><i class="bi bi-heart me-1"></i> Save to favourites</button>
+          <button class="btn btn-naija-outline"><i class="bi bi-calendar-plus me-1"></i> Add to meal plan</button>
+          <button class="btn btn-naija-outline"><i class="bi bi-share me-1"></i> Share</button>
+          <button class="btn btn-naija-outline"><i class="bi bi-printer me-1"></i> Print</button>
+        </div>
+
+        <p class="lead">A rich, velvety soup made from ground melon seeds, leafy greens, assorted meats and fish. Served with pounded yam, it's the centrepiece of countless Nigerian Sunday tables.</p>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs nav-tabs-naija mt-4" id="recipeTabs">
+          <li class="nav-item"><a class="nav-link active" data-tab="ingredients" onclick="switchTab(event,'ingredients')"><i class="bi bi-list-check"></i> Ingredients</a></li>
+          <li class="nav-item"><a class="nav-link" data-tab="instructions" onclick="switchTab(event,'instructions')"><i class="bi bi-card-list"></i> Instructions</a></li>
+          <li class="nav-item"><a class="nav-link" data-tab="video" onclick="switchTab(event,'video')"><i class="bi bi-youtube" style="color:#ff0000"></i> Video</a></li>
+          <li class="nav-item"><a class="nav-link" data-tab="reviews" onclick="switchTab(event,'reviews')"><i class="bi bi-chat-dots"></i> Reviews (94)</a></li>
+        </ul>
+
+        <div class="py-4">
+          <div id="tab-ingredients" class="tab-pane">
+            <div class="ingredient-item"><span class="ingredient-qty">2 cups</span><span>Egusi (melon) seeds, ground</span></div>
+            <div class="ingredient-item"><span class="ingredient-qty">500 g</span><span>Assorted meat (beef, tripe, shaki)</span></div>
+            <div class="ingredient-item"><span class="ingredient-qty">300 g</span><span>Dried fish or stockfish, soaked</span></div>
+            <div class="ingredient-item"><span class="ingredient-qty">1 cup</span><span>Palm oil</span></div>
+            <div class="ingredient-item"><span class="ingredient-qty">4 pcs</span><span>Scotch bonnet peppers, blended</span></div>
+            <div class="ingredient-item"><span class="ingredient-qty">1 bunch</span><span>Ugu (pumpkin) or spinach leaves</span></div>
+            <div class="ingredient-item"><span class="ingredient-qty">2 tbsp</span><span>Ground crayfish</span></div>
+            <div class="ingredient-item"><span class="ingredient-qty">2 cubes</span><span>Seasoning (Maggi / Knorr)</span></div>
+            <div class="ingredient-item"><span class="ingredient-qty">1 tsp</span><span>Salt, to taste</span></div>
+            <div class="ingredient-item"><span class="ingredient-qty">2 tbsp</span><span>Locust beans (Iru) — optional</span></div>
+          </div>
+
+          <div id="tab-instructions" class="tab-pane" style="display:none;">
+            <div class="step-card"><div class="step-num">1</div><div><strong>Cook the meats.</strong> Season assorted meats with onion, salt and a seasoning cube. Boil for 20 minutes until tender. Reserve the stock.</div></div>
+            <div class="step-card"><div class="step-num">2</div><div><strong>Prepare the egusi paste.</strong> Mix ground egusi with a little water to form a thick paste.</div></div>
+            <div class="step-card"><div class="step-num">3</div><div><strong>Fry the base.</strong> Heat palm oil, add sliced onions, then the egusi paste in lumps. Fry for 10 minutes, stirring occasionally.</div></div>
+            <div class="step-card"><div class="step-num">4</div><div><strong>Build the soup.</strong> Add blended pepper, reserved stock, locust beans and crayfish. Simmer for 15 minutes.</div></div>
+            <div class="step-card"><div class="step-num">5</div><div><strong>Finish.</strong> Stir in cooked meats, dried fish, and finally the ugu leaves. Simmer for 5 more minutes. Taste and adjust seasoning.</div></div>
+            <div class="step-card"><div class="step-num">6</div><div><strong>Serve hot</strong> with pounded yam, eba or fufu.</div></div>
+          </div>
+
+          <div id="tab-video" class="tab-pane" style="display:none;">
+            <div class="video-placeholder">
+              <div class="play-btn"><i class="bi bi-play-fill"></i></div>
+            </div>
+            <p class="mt-3 text-muted"><i class="bi bi-youtube" style="color:#ff0000"></i> Watch on YouTube — <em>"Perfect Egusi Soup Recipe by Sisi Yemmie"</em> (embedded iframe in production)</p>
+          </div>
+
+          <div id="tab-reviews" class="tab-pane" style="display:none;">
+            <!-- Write review -->
+            <div class="form-wrap mb-4">
+              <h6 class="mb-3">Leave a review</h6>
+              <div class="mb-2">
+                <span class="stars fs-4" style="cursor:pointer;">
+                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i>
+                </span>
+              </div>
+              <textarea class="form-control mb-3" rows="3" placeholder="How did it turn out?"></textarea>
+              <button class="btn btn-naija">Post review</button>
+            </div>
+
+            <!-- Review items -->
+            <div class="review-item">
+              <div class="d-flex gap-3">
+                <div class="review-avatar">A</div>
+                <div>
+                  <strong>Adaeze O.</strong> <small class="text-muted">· 2 days ago</small>
+                  <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+                  <p class="mb-0 mt-1">Reminded me of my grandmother's kitchen. Tip: let the egusi fry a little longer than you think — that's where the flavour comes from.</p>
+                </div>
+              </div>
+            </div>
+            <div class="review-item">
+              <div class="d-flex gap-3">
+                <div class="review-avatar" style="background:var(--naija-gold);color:var(--naija-dark);">T</div>
+                <div>
+                  <strong>Tunde B.</strong> <small class="text-muted">· 1 week ago</small>
+                  <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i></div>
+                  <p class="mb-0 mt-1">Great recipe. I used spinach instead of ugu since I couldn't find it — still delicious.</p>
+                </div>
+              </div>
+            </div>
+            <div class="review-item">
+              <div class="d-flex gap-3">
+                <div class="review-avatar" style="background:var(--naija-red);">C</div>
+                <div>
+                  <strong>Chinwe M.</strong> <small class="text-muted">· 2 weeks ago</small>
+                  <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
+                  <p class="mb-0 mt-1">Perfect for my son's birthday — the whole family approved!</p>
+                </div>
+              </div>
+            </div>
+            <a href="#" class="btn btn-link" style="color:var(--naija-green);">Load more reviews</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <div class="form-wrap mb-3">
+          <h6 class="mb-3">Recipe info</h6>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Prep time</span><strong>15 min</strong></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Cook time</span><strong>45 min</strong></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Total</span><strong>60 min</strong></div>
+          <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Servings</span><strong>6</strong></div>
+          <div class="d-flex justify-content-between py-2"><span class="text-muted">Posted by</span><strong>Admin</strong></div>
+        </div>
+
+        <div class="form-wrap">
+          <h6 class="mb-3">You might also like</h6>
+          <div class="d-flex gap-3 mb-3" style="cursor:pointer;" data-go="detail">
+            <div class="img-placeholder img-efo" style="width:70px; height:70px; border-radius:8px; flex-shrink:0; padding:0;"></div>
+            <div><strong style="font-size:.92rem;">Efo Riro</strong><br><small class="text-muted stars"><i class="bi bi-star-fill"></i> 4.7 · 50 min</small></div>
+          </div>
+          <div class="d-flex gap-3 mb-3" style="cursor:pointer;" data-go="detail">
+            <div class="img-placeholder img-okra" style="width:70px; height:70px; border-radius:8px; flex-shrink:0; padding:0;"></div>
+            <div><strong style="font-size:.92rem;">Okra Soup</strong><br><small class="text-muted stars"><i class="bi bi-star-fill"></i> 4.5 · 45 min</small></div>
+          </div>
+          <div class="d-flex gap-3" style="cursor:pointer;" data-go="detail">
+            <div class="img-placeholder img-pepper" style="width:70px; height:70px; border-radius:8px; flex-shrink:0; padding:0;"></div>
+            <div><strong style="font-size:.92rem;">Pepper Soup</strong><br><small class="text-muted stars"><i class="bi bi-star-fill"></i> 4.6 · 40 min</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 6: DASHBOARD                                      -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="dashboard">
+  <div class="container py-4">
+    <div class="row mb-4 align-items-center">
+      <div class="col-auto">
+        <div class="review-avatar" style="width:72px; height:72px; font-size:1.8rem;">A</div>
+      </div>
+      <div class="col">
+        <h2 class="mb-1">Welcome back, Adaeze <span style="color:var(--naija-gold);">👋</span></h2>
+        <p class="text-muted mb-0">Member since April 2026 · @adaeze_cooks</p>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-naija-outline"><i class="bi bi-pencil"></i> Edit profile</button>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6"><div class="stat-card">
+        <div class="stat-icon" style="background:#FFE0E0; color:var(--naija-red);"><i class="bi bi-heart-fill"></i></div>
+        <h3>14</h3><small>Favourite recipes</small>
+      </div></div>
+      <div class="col-md-3 col-6"><div class="stat-card">
+        <div class="stat-icon" style="background:#E0F4EC; color:var(--naija-green);"><i class="bi bi-chat-dots-fill"></i></div>
+        <h3>8</h3><small>Reviews posted</small>
+      </div></div>
+      <div class="col-md-3 col-6"><div class="stat-card">
+        <div class="stat-icon" style="background:#FFF3D1; color:var(--naija-gold-dark);"><i class="bi bi-egg-fried"></i></div>
+        <h3>22</h3><small>Recipes tried</small>
+      </div></div>
+      <div class="col-md-3 col-6"><div class="stat-card">
+        <div class="stat-icon" style="background:#E8E4FF; color:#6B4FCF;"><i class="bi bi-trophy-fill"></i></div>
+        <h3>3</h3><small>Day cooking streak</small>
+      </div></div>
+    </div>
+
+    <!-- Dashboard tabs (route to sub-screens) -->
+    <ul class="nav nav-tabs nav-tabs-naija mb-4">
+      <li class="nav-item"><a class="nav-link active" href="#" style="cursor:default;"><i class="bi bi-speedometer2"></i> Overview</a></li>
+      <li class="nav-item"><a class="nav-link" data-go="favourites"><i class="bi bi-heart"></i> My Favourites</a></li>
+      <li class="nav-item"><a class="nav-link" data-go="myreviews"><i class="bi bi-chat"></i> My Reviews</a></li>
+      <li class="nav-item"><a class="nav-link" data-go="usersettings"><i class="bi bi-gear"></i> Settings</a></li>
+    </ul>
+
+    <div class="row g-3">
+      <!-- Recent activity -->
+      <div class="col-lg-8">
+        <div class="form-wrap">
+          <h5 class="mb-3"><i class="bi bi-clock-history"></i> Recent activity</h5>
+          <div class="d-flex align-items-center gap-3 py-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+            <div class="stat-icon" style="background:#FFE0E0; color:var(--naija-red); margin:0;"><i class="bi bi-heart-fill"></i></div>
+            <div class="flex-grow-1">You favourited <strong>Classic Jollof Rice</strong><br><small class="text-muted">3 days ago</small></div>
+            <a class="btn btn-sm btn-naija-outline" data-go="detail">View</a>
+          </div>
+          <div class="d-flex align-items-center gap-3 py-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+            <div class="stat-icon" style="background:#E0F4EC; color:var(--naija-green); margin:0;"><i class="bi bi-chat-dots-fill"></i></div>
+            <div class="flex-grow-1">You reviewed <strong>Egusi Soup</strong> — gave it 5 stars<br><small class="text-muted">5 days ago</small></div>
+            <a class="btn btn-sm btn-naija-outline" data-go="myreviews">See</a>
+          </div>
+          <div class="d-flex align-items-center gap-3 py-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+            <div class="stat-icon" style="background:#FFF3D1; color:var(--naija-gold-dark); margin:0;"><i class="bi bi-heart-fill"></i></div>
+            <div class="flex-grow-1">You favourited <strong>Spicy Beef Suya</strong><br><small class="text-muted">1 week ago</small></div>
+            <a class="btn btn-sm btn-naija-outline" data-go="detail">View</a>
+          </div>
+          <div class="d-flex align-items-center gap-3 py-3">
+            <div class="stat-icon" style="background:#E8E4FF; color:#6B4FCF; margin:0;"><i class="bi bi-chat-dots-fill"></i></div>
+            <div class="flex-grow-1">You reviewed <strong>Puff Puff</strong> — gave it 4 stars<br><small class="text-muted">2 weeks ago</small></div>
+            <a class="btn btn-sm btn-naija-outline" data-go="myreviews">See</a>
+          </div>
+        </div>
+      </div>
+      <!-- Quick actions -->
+      <div class="col-lg-4">
+        <div class="form-wrap mb-3">
+          <h6 class="mb-3">Quick links</h6>
+          <a class="btn btn-naija w-100 mb-2" data-go="favourites"><i class="bi bi-heart"></i> View all favourites</a>
+          <a class="btn btn-naija-outline w-100 mb-2" data-go="myreviews"><i class="bi bi-chat"></i> View all reviews</a>
+          <a class="btn btn-naija-outline w-100 mb-2" data-go="browse"><i class="bi bi-grid"></i> Browse recipes</a>
+          <a class="btn btn-naija-outline w-100" data-go="usersettings"><i class="bi bi-gear"></i> Account settings</a>
+        </div>
+        <div class="form-wrap" style="background: var(--naija-cream); border-color: var(--naija-gold);">
+          <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-warning"></i> Today's suggestion</h6>
+          <p class="mb-2 small">You love Soups &amp; Stews — try <strong>Efo Riro</strong> next, it's 4.7 stars.</p>
+          <a class="btn btn-sm btn-gold" data-go="detail">See recipe →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 7: FAVOURITES                                     -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="favourites">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div><h2 class="mb-1"><i class="bi bi-heart-fill text-danger"></i> My Favourites</h2>
+        <small class="text-muted">Recipes you've saved — 14 total</small>
+      </div>
+      <div class="input-group" style="max-width:280px;">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+        <input type="text" class="form-control" placeholder="Search favourites...">
+      </div>
+    </div>
+
+    <!-- Mini tabs -->
+    <ul class="nav nav-tabs nav-tabs-naija mb-4">
+      <li class="nav-item"><a class="nav-link" data-go="dashboard"><i class="bi bi-speedometer2"></i> Overview</a></li>
+      <li class="nav-item"><a class="nav-link active" href="#" style="cursor:default;"><i class="bi bi-heart"></i> My Favourites</a></li>
+      <li class="nav-item"><a class="nav-link" data-go="myreviews"><i class="bi bi-chat"></i> My Reviews</a></li>
+      <li class="nav-item"><a class="nav-link" data-go="usersettings"><i class="bi bi-gear"></i> Settings</a></li>
+    </ul>
+
+    <div class="row g-3">
+      <div class="col-md-3 col-sm-6"><div class="recipe-card" data-go="detail">
+        <div class="img-placeholder img-jollof" data-label="Jollof Rice"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">45 min</span></div>
+        <div class="body"><span class="category-tag">Rice Dishes</span><h5>Classic Jollof Rice</h5>
+          <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.9</span><span class="badge badge-diff-med">Medium</span></div></div>
+      </div></div>
+      <div class="col-md-3 col-sm-6"><div class="recipe-card" data-go="detail">
+        <div class="img-placeholder img-egusi" data-label="Egusi Soup"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">60 min</span></div>
+        <div class="body"><span class="category-tag">Soups</span><h5>Egusi Soup</h5>
+          <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.7</span><span class="badge badge-diff-med">Medium</span></div></div>
+      </div></div>
+      <div class="col-md-3 col-sm-6"><div class="recipe-card" data-go="detail">
+        <div class="img-placeholder img-suya" data-label="Suya"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">30 min</span></div>
+        <div class="body"><span class="category-tag">Grills</span><h5>Spicy Beef Suya</h5>
+          <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.9</span><span class="badge badge-diff-easy">Easy</span></div></div>
+      </div></div>
+      <div class="col-md-3 col-sm-6"><div class="recipe-card" data-go="detail">
+        <div class="img-placeholder img-puffpuff" data-label="Puff Puff"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">35 min</span></div>
+        <div class="body"><span class="category-tag">Snacks</span><h5>Fluffy Puff Puff</h5>
+          <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.8</span><span class="badge badge-diff-easy">Easy</span></div></div>
+      </div></div>
+      <div class="col-md-3 col-sm-6"><div class="recipe-card" data-go="detail">
+        <div class="img-placeholder img-moimoi" data-label="Moi Moi"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">75 min</span></div>
+        <div class="body"><span class="category-tag">Breakfast</span><h5>Steamed Moi Moi</h5>
+          <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.5</span><span class="badge badge-diff-med">Medium</span></div></div>
+      </div></div>
+      <div class="col-md-3 col-sm-6"><div class="recipe-card" data-go="detail">
+        <div class="img-placeholder img-akara" data-label="Akara"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">30 min</span></div>
+        <div class="body"><span class="category-tag">Breakfast</span><h5>Akara (Bean Cakes)</h5>
+          <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.6</span><span class="badge badge-diff-easy">Easy</span></div></div>
+      </div></div>
+      <div class="col-md-3 col-sm-6"><div class="recipe-card" data-go="detail">
+        <div class="img-placeholder img-zobo" data-label="Zobo Drink"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">25 min</span></div>
+        <div class="body"><span class="category-tag">Drinks</span><h5>Zobo Hibiscus Drink</h5>
+          <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.4</span><span class="badge badge-diff-easy">Easy</span></div></div>
+      </div></div>
+      <div class="col-md-3 col-sm-6"><div class="recipe-card" data-go="detail">
+        <div class="img-placeholder img-chinchin" data-label="Chin Chin"><button class="fav-btn"><i class="bi bi-heart-fill"></i></button><span class="time-badge">50 min</span></div>
+        <div class="body"><span class="category-tag">Snacks</span><h5>Crunchy Chin Chin</h5>
+          <div class="card-meta"><span class="stars"><i class="bi bi-star-fill"></i> 4.3</span><span class="badge badge-diff-easy">Easy</span></div></div>
+      </div></div>
+    </div>
+
+    <div class="alert alert-warning mt-4" role="alert" style="background:var(--naija-cream); border-color:var(--naija-gold); color:var(--naija-dark);">
+      <i class="bi bi-info-circle-fill me-2"></i>
+      Back to your dashboard? <a data-go="dashboard" style="color:var(--naija-green); font-weight:600; cursor:pointer;">View overview →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 8: MY REVIEWS                                     -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="myreviews">
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div>
+        <h2 class="mb-1"><i class="bi bi-chat-dots-fill text-naija-green"></i> My Reviews</h2>
+        <small class="text-muted">8 reviews you've posted — average rating you give: 4.4</small>
+      </div>
+      <div class="d-flex gap-2">
+        <select class="form-select form-select-sm" style="width:auto;">
+          <option>All ratings</option>
+          <option>5 stars</option>
+          <option>4 stars</option>
+          <option>3 stars or fewer</option>
+        </select>
+        <select class="form-select form-select-sm" style="width:auto;">
+          <option>Newest first</option>
+          <option>Oldest first</option>
+          <option>Highest rated</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Mini tabs for dashboard sub-navigation -->
+    <ul class="nav nav-tabs nav-tabs-naija mb-4">
+      <li class="nav-item"><a class="nav-link" data-go="dashboard"><i class="bi bi-speedometer2"></i> Overview</a></li>
+      <li class="nav-item"><a class="nav-link" data-go="favourites"><i class="bi bi-heart"></i> My Favourites</a></li>
+      <li class="nav-item"><a class="nav-link active" href="#" style="cursor:default;"><i class="bi bi-chat"></i> My Reviews</a></li>
+      <li class="nav-item"><a class="nav-link" data-go="usersettings"><i class="bi bi-gear"></i> Settings</a></li>
+    </ul>
+
+    <div class="form-wrap">
+      <!-- Review 1 -->
+      <div class="d-flex gap-3 py-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+        <div class="img-placeholder img-egusi" style="width:90px; height:90px; border-radius:10px; flex-shrink:0; padding:0; cursor:pointer;" data-go="detail"></div>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+              <strong>Egusi Soup</strong> <small class="text-muted">· Soups &amp; Stews</small>
+              <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+            </div>
+            <small class="text-muted">5 days ago</small>
+          </div>
+          <p class="mb-2 mt-1">Reminded me of my grandmother's kitchen. Tip: let the egusi fry a little longer than you think — that's where the flavour comes from.</p>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-naija-outline"><i class="bi bi-pencil"></i> Edit</button>
+            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 2 -->
+      <div class="d-flex gap-3 py-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+        <div class="img-placeholder img-puffpuff" style="width:90px; height:90px; border-radius:10px; flex-shrink:0; padding:0; cursor:pointer;" data-go="detail"></div>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+              <strong>Fluffy Puff Puff</strong> <small class="text-muted">· Snacks</small>
+              <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i></div>
+            </div>
+            <small class="text-muted">2 weeks ago</small>
+          </div>
+          <p class="mb-2 mt-1">Worked on my second attempt. First batch came out dense — the key is letting the dough rise for a full hour.</p>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-naija-outline"><i class="bi bi-pencil"></i> Edit</button>
+            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 3 -->
+      <div class="d-flex gap-3 py-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+        <div class="img-placeholder img-jollof" style="width:90px; height:90px; border-radius:10px; flex-shrink:0; padding:0; cursor:pointer;" data-go="detail"></div>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+              <strong>Classic Jollof Rice</strong> <small class="text-muted">· Rice Dishes</small>
+              <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+            </div>
+            <small class="text-muted">3 weeks ago</small>
+          </div>
+          <p class="mb-2 mt-1">Party Jollof at its finest. I added a bit of smoked turkey for extra depth and the family fought over the last bits of rice at the bottom of the pot.</p>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-naija-outline"><i class="bi bi-pencil"></i> Edit</button>
+            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review 4 -->
+      <div class="d-flex gap-3 py-3">
+        <div class="img-placeholder img-suya" style="width:90px; height:90px; border-radius:10px; flex-shrink:0; padding:0; cursor:pointer;" data-go="detail"></div>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+              <strong>Spicy Beef Suya</strong> <small class="text-muted">· Grills &amp; BBQ</small>
+              <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
+            </div>
+            <small class="text-muted">1 month ago</small>
+          </div>
+          <p class="mb-2 mt-1">Yaji spice is the secret — don't skip toasting the groundnuts first. Mine came out closer to mallam-level on my third try.</p>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-naija-outline"><i class="bi bi-pencil"></i> Edit</button>
+            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-center mt-4">
+      <button class="btn btn-naija-outline">Load more reviews</button>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 9: USER SETTINGS                                  -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="usersettings">
+  <div class="container py-4">
+    <div class="mb-4">
+      <h2 class="mb-1"><i class="bi bi-gear-fill text-naija-green"></i> Account Settings</h2>
+      <small class="text-muted">Manage your profile, password and preferences.</small>
+    </div>
+
+    <!-- Mini tabs -->
+    <ul class="nav nav-tabs nav-tabs-naija mb-4">
+      <li class="nav-item"><a class="nav-link" data-go="dashboard"><i class="bi bi-speedometer2"></i> Overview</a></li>
+      <li class="nav-item"><a class="nav-link" data-go="favourites"><i class="bi bi-heart"></i> My Favourites</a></li>
+      <li class="nav-item"><a class="nav-link" data-go="myreviews"><i class="bi bi-chat"></i> My Reviews</a></li>
+      <li class="nav-item"><a class="nav-link active" href="#" style="cursor:default;"><i class="bi bi-gear"></i> Settings</a></li>
+    </ul>
+
+    <div class="row g-3">
+      <!-- Left nav -->
+      <div class="col-lg-3">
+        <div class="form-wrap" style="padding:0.5rem;">
+          <a href="#profile-sec" class="admin-link active" style="color:var(--naija-dark);"><i class="bi bi-person"></i> Profile</a>
+          <a href="#password-sec" class="admin-link" style="color:var(--naija-dark);"><i class="bi bi-shield-lock"></i> Password</a>
+          <a href="#notify-sec" class="admin-link" style="color:var(--naija-dark);"><i class="bi bi-bell"></i> Notifications</a>
+          <a href="#privacy-sec" class="admin-link" style="color:var(--naija-dark);"><i class="bi bi-eye"></i> Privacy</a>
+          <a href="#danger-sec" class="admin-link" style="color:var(--naija-red);"><i class="bi bi-exclamation-triangle"></i> Danger zone</a>
+        </div>
+      </div>
+
+      <!-- Right content -->
+      <div class="col-lg-9">
+        <!-- Profile -->
+        <div class="form-wrap mb-3" id="profile-sec">
+          <h5 class="mb-3"><i class="bi bi-person"></i> Profile information</h5>
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="review-avatar" style="width:72px; height:72px; font-size:1.8rem;">A</div>
+            <div>
+              <button class="btn btn-sm btn-naija-outline"><i class="bi bi-camera"></i> Change photo</button>
+              <button class="btn btn-sm btn-link text-danger">Remove</button>
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Full name</label>
+              <input class="form-control" value="Adaeze Okoro">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Username</label>
+              <input class="form-control" value="adaeze_cooks">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input class="form-control" type="email" value="adaeze@example.com">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Location (optional)</label>
+              <input class="form-control" placeholder="e.g. Lagos, Nigeria">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Bio</label>
+              <textarea class="form-control" rows="2" placeholder="Say something about your cooking style...">Home cook from Lagos. I love soups and anything with palm oil.</textarea>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button class="btn btn-naija">Save changes</button>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-wrap mb-3" id="password-sec">
+          <h5 class="mb-3"><i class="bi bi-shield-lock"></i> Change password</h5>
+          <div class="row g-3">
+            <div class="col-md-12">
+              <label class="form-label">Current password</label>
+              <input class="form-control" type="password" placeholder="••••••••">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">New password</label>
+              <input class="form-control" type="password" placeholder="At least 8 characters">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Confirm new password</label>
+              <input class="form-control" type="password" placeholder="Re-enter new password">
+            </div>
+          </div>
+          <div class="mt-3"><button class="btn btn-naija">Update password</button></div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="form-wrap mb-3" id="notify-sec">
+          <h5 class="mb-3"><i class="bi bi-bell"></i> Email notifications</h5>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="n1" checked>
+            <label class="form-check-label" for="n1">Someone comments on my review</label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="n2" checked>
+            <label class="form-check-label" for="n2">Weekly featured recipes digest</label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="n3">
+            <label class="form-check-label" for="n3">New recipe in a category I've favourited</label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="n4">
+            <label class="form-check-label" for="n4">Product updates &amp; news</label>
+          </div>
+          <div class="mt-3"><button class="btn btn-naija">Save preferences</button></div>
+        </div>
+
+        <!-- Privacy -->
+        <div class="form-wrap mb-3" id="privacy-sec">
+          <h5 class="mb-3"><i class="bi bi-eye"></i> Privacy</h5>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="p1" checked>
+            <label class="form-check-label" for="p1">Show my reviews publicly with my username</label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="p2">
+            <label class="form-check-label" for="p2">Allow others to see my favourites list</label>
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="p3" checked>
+            <label class="form-check-label" for="p3">Show my profile on the leaderboard</label>
+          </div>
+        </div>
+
+        <!-- Danger -->
+        <div class="form-wrap" id="danger-sec" style="border: 1px solid #FFD7D7; background: #FFF8F8;">
+          <h5 class="mb-3 text-danger"><i class="bi bi-exclamation-triangle"></i> Danger zone</h5>
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-3" style="border-bottom: 1px solid #FFD7D7;">
+            <div>
+              <strong>Export my data</strong><br>
+              <small class="text-muted">Download a ZIP of all your reviews, favourites and profile info.</small>
+            </div>
+            <button class="btn btn-sm btn-naija-outline">Request export</button>
+          </div>
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <strong class="text-danger">Delete my account</strong><br>
+              <small class="text-muted">This will permanently remove your account, reviews and favourites. This action cannot be undone.</small>
+            </div>
+            <button class="btn btn-sm btn-outline-danger">Delete account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 10: ADMIN PANEL (with internal view switching)    -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="admin">
+  <div class="container-fluid py-4">
+    <div class="row g-3">
+      <!-- Sidebar -->
+      <div class="col-lg-2">
+        <div class="admin-sidebar">
+          <div class="text-center mb-3 pb-3" style="border-bottom: 1px solid rgba(255,255,255,.1);">
+            <i class="bi bi-shield-lock-fill" style="color:var(--naija-gold); font-size:1.8rem;"></i>
+            <h6 style="color:#fff; margin:8px 0 0;">Admin Panel</h6>
+            <small class="text-white-50">@admin</small>
+          </div>
+          <a href="#" class="admin-link active" data-adminview="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+          <a href="#" class="admin-link" data-adminview="recipes"><i class="bi bi-egg-fried"></i> Recipes</a>
+          <a href="#" class="admin-link" data-adminview="users"><i class="bi bi-people"></i> Users</a>
+          <a href="#" class="admin-link" data-adminview="reviews"><i class="bi bi-chat-square-text"></i> Reviews</a>
+          <a href="#" class="admin-link" data-adminview="categories"><i class="bi bi-tags"></i> Categories</a>
+          <a href="#" class="admin-link" data-adminview="analytics"><i class="bi bi-bar-chart"></i> Analytics</a>
+          <a href="#" class="admin-link" data-adminview="settings"><i class="bi bi-gear"></i> Settings</a>
+          <div class="mt-3 pt-3" style="border-top: 1px solid rgba(255,255,255,.1);">
+            <a class="admin-link" data-go="landing"><i class="bi bi-box-arrow-left"></i> Back to site</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-10">
+
+        <!-- ============ VIEW: DASHBOARD ============ -->
+        <div class="admin-view" data-adminview="dashboard">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">Dashboard</h2>
+            <a class="btn btn-naija" data-go="addrecipe"><i class="bi bi-plus-lg"></i> Add Recipe</a>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6"><div class="stat-card">
+              <div class="stat-icon" style="background:#E0F4EC; color:var(--naija-green);"><i class="bi bi-egg-fried"></i></div>
+              <h3>214</h3><small>Total recipes</small>
+              <div class="mt-1"><small class="text-success"><i class="bi bi-arrow-up"></i> 12 this week</small></div>
+            </div></div>
+            <div class="col-md-3 col-6"><div class="stat-card">
+              <div class="stat-icon" style="background:#FFF3D1; color:var(--naija-gold-dark);"><i class="bi bi-people"></i></div>
+              <h3>5,284</h3><small>Registered users</small>
+              <div class="mt-1"><small class="text-success"><i class="bi bi-arrow-up"></i> 148 this week</small></div>
+            </div></div>
+            <div class="col-md-3 col-6"><div class="stat-card">
+              <div class="stat-icon" style="background:#FFE0E0; color:var(--naija-red);"><i class="bi bi-chat-dots"></i></div>
+              <h3>1,892</h3><small>Reviews</small>
+              <div class="mt-1"><small class="text-warning"><i class="bi bi-exclamation-circle"></i> 3 flagged</small></div>
+            </div></div>
+            <div class="col-md-3 col-6"><div class="stat-card">
+              <div class="stat-icon" style="background:#E8E4FF; color:#6B4FCF;"><i class="bi bi-tags"></i></div>
+              <h3>12</h3><small>Categories</small>
+            </div></div>
+          </div>
+
+          <div class="admin-table">
+            <div class="p-3 d-flex justify-content-between align-items-center" style="border-bottom:1px solid var(--naija-gray-200);">
+              <h5 class="mb-0">Recent Recipes</h5>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-naija-outline" data-adminview-go="recipes">View all →</button>
+              </div>
+            </div>
+            <table class="table mb-0">
+              <thead>
+                <tr><th>Recipe</th><th>Category</th><th>Author</th><th>Rating</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="d-flex gap-2 align-items-center"><div class="thumb img-jollof"></div><strong>Classic Jollof Rice</strong></div></td>
+                  <td>Rice Dishes</td><td>admin</td>
+                  <td><span class="stars"><i class="bi bi-star-fill"></i> 4.9</span> <small class="text-muted">(128)</small></td>
+                  <td><span class="badge bg-success">Published</span></td>
+                  <td>
+                    <button class="action-icon edit" data-go="addrecipe"><i class="bi bi-pencil"></i></button>
+                    <button class="action-icon delete"><i class="bi bi-trash"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><div class="d-flex gap-2 align-items-center"><div class="thumb img-egusi"></div><strong>Egusi Soup</strong></div></td>
+                  <td>Soups</td><td>admin</td>
+                  <td><span class="stars"><i class="bi bi-star-fill"></i> 4.7</span> <small class="text-muted">(94)</small></td>
+                  <td><span class="badge bg-success">Published</span></td>
+                  <td>
+                    <button class="action-icon edit"><i class="bi bi-pencil"></i></button>
+                    <button class="action-icon delete"><i class="bi bi-trash"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><div class="d-flex gap-2 align-items-center"><div class="thumb img-suya"></div><strong>Beef Suya</strong></div></td>
+                  <td>Grills</td><td>admin</td>
+                  <td><span class="stars"><i class="bi bi-star-fill"></i> 4.9</span> <small class="text-muted">(210)</small></td>
+                  <td><span class="badge bg-success">Published</span></td>
+                  <td>
+                    <button class="action-icon edit"><i class="bi bi-pencil"></i></button>
+                    <button class="action-icon delete"><i class="bi bi-trash"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><div class="d-flex gap-2 align-items-center"><div class="thumb img-moimoi"></div><strong>Moi Moi</strong></div></td>
+                  <td>Breakfast</td><td>adaeze_cooks</td>
+                  <td><span class="stars"><i class="bi bi-star-fill"></i> 4.5</span> <small class="text-muted">(64)</small></td>
+                  <td><span class="badge bg-warning text-dark">Pending</span></td>
+                  <td>
+                    <button class="action-icon edit"><i class="bi bi-pencil"></i></button>
+                    <button class="action-icon delete"><i class="bi bi-trash"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td><div class="d-flex gap-2 align-items-center"><div class="thumb img-zobo"></div><strong>Zobo Hibiscus Drink</strong></div></td>
+                  <td>Drinks</td><td>tunde_b</td>
+                  <td><span class="stars"><i class="bi bi-star-fill"></i> 4.4</span> <small class="text-muted">(48)</small></td>
+                  <td><span class="badge bg-secondary">Draft</span></td>
+                  <td>
+                    <button class="action-icon edit"><i class="bi bi-pencil"></i></button>
+                    <button class="action-icon delete"><i class="bi bi-trash"></i></button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ============ VIEW: RECIPES ============ -->
+        <div class="admin-view" data-adminview="recipes" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h2 class="mb-0"><i class="bi bi-egg-fried"></i> Recipes</h2>
+            <a class="btn btn-naija" data-go="addrecipe"><i class="bi bi-plus-lg"></i> Add Recipe</a>
+          </div>
+          <div class="d-flex gap-2 mb-3 flex-wrap">
+            <div class="input-group" style="max-width:300px;">
+              <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" placeholder="Search recipes...">
+            </div>
+            <select class="form-select" style="max-width:180px;">
+              <option>All statuses</option><option>Published</option><option>Pending review</option><option>Draft</option><option>Rejected</option>
+            </select>
+            <select class="form-select" style="max-width:180px;">
+              <option>All categories</option><option>Soups &amp; Stews</option><option>Rice Dishes</option><option>Snacks</option><option>Drinks</option>
+            </select>
+          </div>
+          <div class="admin-table">
+            <table class="table mb-0">
+              <thead><tr><th style="width:40px;"><input type="checkbox"></th><th>Recipe</th><th>Category</th><th>Author</th><th>Rating</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr><td><input type="checkbox"></td><td><div class="d-flex gap-2 align-items-center"><div class="thumb img-jollof"></div><strong>Classic Jollof Rice</strong></div></td><td>Rice Dishes</td><td>admin</td><td><span class="stars"><i class="bi bi-star-fill"></i> 4.9</span></td><td><span class="badge bg-success">Published</span></td><td class="text-muted small">15 Apr 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                <tr><td><input type="checkbox"></td><td><div class="d-flex gap-2 align-items-center"><div class="thumb img-egusi"></div><strong>Egusi Soup</strong></div></td><td>Soups</td><td>admin</td><td><span class="stars"><i class="bi bi-star-fill"></i> 4.7</span></td><td><span class="badge bg-success">Published</span></td><td class="text-muted small">12 Apr 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                <tr><td><input type="checkbox"></td><td><div class="d-flex gap-2 align-items-center"><div class="thumb img-suya"></div><strong>Beef Suya</strong></div></td><td>Grills</td><td>admin</td><td><span class="stars"><i class="bi bi-star-fill"></i> 4.9</span></td><td><span class="badge bg-success">Published</span></td><td class="text-muted small">08 Apr 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                <tr><td><input type="checkbox"></td><td><div class="d-flex gap-2 align-items-center"><div class="thumb img-moimoi"></div><strong>Steamed Moi Moi</strong></div></td><td>Breakfast</td><td>adaeze_cooks</td><td><span class="stars"><i class="bi bi-star-fill"></i> 4.5</span></td><td><span class="badge bg-warning text-dark">Pending</span></td><td class="text-muted small">20 Apr 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                <tr><td><input type="checkbox"></td><td><div class="d-flex gap-2 align-items-center"><div class="thumb img-zobo"></div><strong>Zobo Hibiscus Drink</strong></div></td><td>Drinks</td><td>tunde_b</td><td><span class="stars"><i class="bi bi-star-fill"></i> 4.4</span></td><td><span class="badge bg-secondary">Draft</span></td><td class="text-muted small">18 Apr 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                <tr><td><input type="checkbox"></td><td><div class="d-flex gap-2 align-items-center"><div class="thumb img-pepper"></div><strong>Catfish Pepper Soup</strong></div></td><td>Soups</td><td>admin</td><td><span class="stars"><i class="bi bi-star-fill"></i> 4.6</span></td><td><span class="badge bg-success">Published</span></td><td class="text-muted small">05 Apr 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                <tr><td><input type="checkbox"></td><td><div class="d-flex gap-2 align-items-center"><div class="thumb img-chinchin"></div><strong>Crunchy Chin Chin</strong></div></td><td>Snacks</td><td>admin</td><td><span class="stars"><i class="bi bi-star-fill"></i> 4.3</span></td><td><span class="badge bg-success">Published</span></td><td class="text-muted small">02 Apr 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                <tr><td><input type="checkbox"></td><td><div class="d-flex gap-2 align-items-center"><div class="thumb img-okra"></div><strong>Okra Soup</strong></div></td><td>Soups</td><td>admin</td><td><span class="stars"><i class="bi bi-star-fill"></i> 4.5</span></td><td><span class="badge bg-success">Published</span></td><td class="text-muted small">28 Mar 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <nav class="mt-3"><ul class="pagination pagination-sm justify-content-center">
+            <li class="page-item disabled"><a class="page-link">«</a></li>
+            <li class="page-item active"><a class="page-link" style="background:var(--naija-green);border-color:var(--naija-green);">1</a></li>
+            <li class="page-item"><a class="page-link">2</a></li>
+            <li class="page-item"><a class="page-link">3</a></li>
+            <li class="page-item"><a class="page-link">…</a></li>
+            <li class="page-item"><a class="page-link">27</a></li>
+            <li class="page-item"><a class="page-link">»</a></li>
+          </ul></nav>
+        </div>
+
+        <!-- ============ VIEW: USERS ============ -->
+        <div class="admin-view" data-adminview="users" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h2 class="mb-0"><i class="bi bi-people"></i> Users</h2>
+            <button class="btn btn-naija"><i class="bi bi-envelope"></i> Send broadcast email</button>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-3"><div class="stat-card"><h3>5,284</h3><small>Total users</small></div></div>
+            <div class="col-md-3"><div class="stat-card"><h3>4,721</h3><small>Active last 30 days</small></div></div>
+            <div class="col-md-3"><div class="stat-card"><h3>148</h3><small>New this week</small></div></div>
+            <div class="col-md-3"><div class="stat-card"><h3>4</h3><small>Admin accounts</small></div></div>
+          </div>
+          <div class="d-flex gap-2 mb-3 flex-wrap">
+            <div class="input-group" style="max-width:300px;">
+              <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" placeholder="Search by name, email, username...">
+            </div>
+            <select class="form-select" style="max-width:180px;"><option>All roles</option><option>User</option><option>Admin</option></select>
+            <select class="form-select" style="max-width:180px;"><option>All statuses</option><option>Active</option><option>Suspended</option></select>
+          </div>
+          <div class="admin-table">
+            <table class="table mb-0">
+              <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Activity</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr><td><div class="d-flex gap-2 align-items-center"><div class="review-avatar" style="width:36px;height:36px;font-size:.9rem;">A</div><div><strong>Adaeze Okoro</strong><br><small class="text-muted">@adaeze_cooks</small></div></div></td><td class="small">adaeze@example.com</td><td><span class="badge bg-secondary">User</span></td><td><span class="badge bg-success">Active</span></td><td class="small text-muted">10 Apr 2026</td><td class="small">14 favs · 8 reviews</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon"><i class="bi bi-slash-circle"></i></button></td></tr>
+                <tr><td><div class="d-flex gap-2 align-items-center"><div class="review-avatar" style="width:36px;height:36px;font-size:.9rem;background:var(--naija-gold);color:var(--naija-dark);">T</div><div><strong>Tunde Bello</strong><br><small class="text-muted">@tunde_b</small></div></div></td><td class="small">tunde@example.com</td><td><span class="badge bg-secondary">User</span></td><td><span class="badge bg-success">Active</span></td><td class="small text-muted">05 Apr 2026</td><td class="small">22 favs · 15 reviews</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon"><i class="bi bi-slash-circle"></i></button></td></tr>
+                <tr><td><div class="d-flex gap-2 align-items-center"><div class="review-avatar" style="width:36px;height:36px;font-size:.9rem;background:var(--naija-red);">C</div><div><strong>Chinwe Madu</strong><br><small class="text-muted">@chinwe_m</small></div></div></td><td class="small">chinwe@example.com</td><td><span class="badge bg-secondary">User</span></td><td><span class="badge bg-success">Active</span></td><td class="small text-muted">01 Apr 2026</td><td class="small">9 favs · 4 reviews</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon"><i class="bi bi-slash-circle"></i></button></td></tr>
+                <tr><td><div class="d-flex gap-2 align-items-center"><div class="review-avatar" style="width:36px;height:36px;font-size:.9rem;background:var(--naija-dark);">S</div><div><strong>Site Admin</strong><br><small class="text-muted">@admin</small></div></div></td><td class="small">admin@naijacipe.app</td><td><span class="badge" style="background:var(--naija-gold);color:var(--naija-dark);">Admin</span></td><td><span class="badge bg-success">Active</span></td><td class="small text-muted">01 Jan 2026</td><td class="small">—</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button></td></tr>
+                <tr><td><div class="d-flex gap-2 align-items-center"><div class="review-avatar" style="width:36px;height:36px;font-size:.9rem;background:#999;">F</div><div><strong>Fake User</strong><br><small class="text-muted">@spam123</small></div></div></td><td class="small">fake@bad.com</td><td><span class="badge bg-secondary">User</span></td><td><span class="badge bg-danger">Suspended</span></td><td class="small text-muted">20 Apr 2026</td><td class="small">0 favs · 0 reviews</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ============ VIEW: REVIEWS ============ -->
+        <div class="admin-view" data-adminview="reviews" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h2 class="mb-0"><i class="bi bi-chat-square-text"></i> Reviews</h2>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-naija-outline">All (1,892)</button>
+              <button class="btn btn-sm btn-naija">Flagged (3)</button>
+              <button class="btn btn-sm btn-naija-outline">Hidden (12)</button>
+            </div>
+          </div>
+
+          <div class="form-wrap">
+            <!-- Flagged review -->
+            <div class="d-flex gap-3 p-3 mb-3" style="border: 1px solid var(--naija-red); background: #FFF8F8; border-radius: 10px;">
+              <div class="review-avatar" style="background:var(--naija-red);">S</div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between flex-wrap">
+                  <div>
+                    <strong>@spam123</strong> on <strong>Jollof Rice</strong> <span class="badge bg-danger ms-2">3 flags</span>
+                    <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i><i class="bi bi-star"></i></div>
+                  </div>
+                  <small class="text-muted">2 hours ago</small>
+                </div>
+                <p class="mt-1 mb-2 fst-italic">"Visit www.badlink.com for cheaper recipes..."</p>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-danger">Delete review</button>
+                  <button class="btn btn-sm btn-outline-secondary">Hide</button>
+                  <button class="btn btn-sm btn-naija-outline">Suspend user</button>
+                  <button class="btn btn-sm btn-link text-muted">Dismiss flags</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Normal review -->
+            <div class="d-flex gap-3 py-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+              <div class="review-avatar">A</div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between flex-wrap">
+                  <div>
+                    <strong>@adaeze_cooks</strong> on <strong>Egusi Soup</strong>
+                    <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
+                  </div>
+                  <small class="text-muted">2 days ago</small>
+                </div>
+                <p class="mt-1 mb-2">Reminded me of my grandmother's kitchen. Tip: let the egusi fry a little longer.</p>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-danger">Delete</button>
+                  <button class="btn btn-sm btn-outline-secondary">Hide</button>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex gap-3 py-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+              <div class="review-avatar" style="background:var(--naija-gold);color:var(--naija-dark);">T</div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between flex-wrap">
+                  <div>
+                    <strong>@tunde_b</strong> on <strong>Beef Suya</strong>
+                    <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i></div>
+                  </div>
+                  <small class="text-muted">4 days ago</small>
+                </div>
+                <p class="mt-1 mb-2">Great recipe. I used spinach instead of ugu since I couldn't find it — still delicious.</p>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-danger">Delete</button>
+                  <button class="btn btn-sm btn-outline-secondary">Hide</button>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex gap-3 py-3">
+              <div class="review-avatar" style="background:var(--naija-red);">C</div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between flex-wrap">
+                  <div>
+                    <strong>@chinwe_m</strong> on <strong>Puff Puff</strong>
+                    <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-half"></i></div>
+                  </div>
+                  <small class="text-muted">1 week ago</small>
+                </div>
+                <p class="mt-1 mb-2">Perfect for my son's birthday — the whole family approved!</p>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-danger">Delete</button>
+                  <button class="btn btn-sm btn-outline-secondary">Hide</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ VIEW: CATEGORIES ============ -->
+        <div class="admin-view" data-adminview="categories" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h2 class="mb-0"><i class="bi bi-tags"></i> Categories</h2>
+          </div>
+
+          <div class="row g-3">
+            <!-- Add form -->
+            <div class="col-lg-4">
+              <div class="form-wrap">
+                <h5 class="mb-3"><i class="bi bi-plus-circle"></i> Add category</h5>
+                <div class="mb-3"><label class="form-label">Name</label><input class="form-control" placeholder="e.g. Street food"></div>
+                <div class="mb-3"><label class="form-label">Slug</label><input class="form-control" placeholder="street-food"><small class="text-muted">URL-friendly identifier</small></div>
+                <div class="mb-3"><label class="form-label">Icon</label>
+                  <select class="form-select"><option>bi-cup-hot</option><option>bi-egg-fried</option><option>bi-basket3</option><option>bi-cookie</option><option>bi-cup-straw</option></select>
+                </div>
+                <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" rows="2" placeholder="Short description..."></textarea></div>
+                <button class="btn btn-naija w-100">Add category</button>
+              </div>
+            </div>
+            <!-- Existing -->
+            <div class="col-lg-8">
+              <div class="admin-table">
+                <table class="table mb-0">
+                  <thead><tr><th>Name</th><th>Slug</th><th>Recipes</th><th>Created</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    <tr><td><i class="bi bi-cup-hot text-naija-green me-2"></i><strong>Soups &amp; Stews</strong></td><td class="small text-muted">soups-stews</td><td>42</td><td class="small text-muted">Jan 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                    <tr><td><i class="bi bi-egg-fried text-naija-green me-2"></i><strong>Rice Dishes</strong></td><td class="small text-muted">rice-dishes</td><td>28</td><td class="small text-muted">Jan 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                    <tr><td><i class="bi bi-basket3 text-naija-green me-2"></i><strong>Swallow</strong></td><td class="small text-muted">swallow</td><td>15</td><td class="small text-muted">Jan 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                    <tr><td><i class="bi bi-cookie text-naija-green me-2"></i><strong>Snacks</strong></td><td class="small text-muted">snacks</td><td>36</td><td class="small text-muted">Jan 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                    <tr><td><i class="bi bi-cup-straw text-naija-green me-2"></i><strong>Drinks</strong></td><td class="small text-muted">drinks</td><td>18</td><td class="small text-muted">Jan 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                    <tr><td><i class="bi bi-sunrise text-naija-green me-2"></i><strong>Breakfast</strong></td><td class="small text-muted">breakfast</td><td>24</td><td class="small text-muted">Jan 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                    <tr><td><i class="bi bi-fire text-naija-green me-2"></i><strong>Grills &amp; BBQ</strong></td><td class="small text-muted">grills-bbq</td><td>12</td><td class="small text-muted">Feb 2026</td><td><button class="action-icon edit"><i class="bi bi-pencil"></i></button><button class="action-icon delete"><i class="bi bi-trash"></i></button></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ VIEW: ANALYTICS ============ -->
+        <div class="admin-view" data-adminview="analytics" style="display:none;">
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h2 class="mb-0"><i class="bi bi-bar-chart"></i> Analytics</h2>
+            <select class="form-select" style="max-width:200px;"><option>Last 30 days</option><option>Last 7 days</option><option>Last 3 months</option><option>Last 12 months</option></select>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-3 col-6"><div class="stat-card"><h3>18,340</h3><small>Page views</small><div class="mt-1"><small class="text-success"><i class="bi bi-arrow-up"></i> 12%</small></div></div></div>
+            <div class="col-md-3 col-6"><div class="stat-card"><h3>5,284</h3><small>Unique visitors</small><div class="mt-1"><small class="text-success"><i class="bi bi-arrow-up"></i> 8%</small></div></div></div>
+            <div class="col-md-3 col-6"><div class="stat-card"><h3>3:42</h3><small>Avg. session time</small><div class="mt-1"><small class="text-success"><i class="bi bi-arrow-up"></i> 5%</small></div></div></div>
+            <div class="col-md-3 col-6"><div class="stat-card"><h3>32%</h3><small>Bounce rate</small><div class="mt-1"><small class="text-danger"><i class="bi bi-arrow-down"></i> 3% (good)</small></div></div></div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-lg-8"><div class="form-wrap">
+              <h5 class="mb-3">Recipes posted per week</h5>
+              <!-- Simple bar chart in CSS -->
+              <div style="display:flex; align-items:flex-end; gap:8px; height:180px; padding:10px 0;">
+                <div style="flex:1; background: var(--naija-green); height:30%; border-radius:6px 6px 0 0;" title="Week 1"></div>
+                <div style="flex:1; background: var(--naija-green); height:55%; border-radius:6px 6px 0 0;" title="Week 2"></div>
+                <div style="flex:1; background: var(--naija-green); height:40%; border-radius:6px 6px 0 0;" title="Week 3"></div>
+                <div style="flex:1; background: var(--naija-green); height:70%; border-radius:6px 6px 0 0;" title="Week 4"></div>
+                <div style="flex:1; background: var(--naija-green); height:60%; border-radius:6px 6px 0 0;" title="Week 5"></div>
+                <div style="flex:1; background: var(--naija-green); height:85%; border-radius:6px 6px 0 0;" title="Week 6"></div>
+                <div style="flex:1; background: var(--naija-gold); height:95%; border-radius:6px 6px 0 0;" title="Week 7 (current)"></div>
+              </div>
+              <div class="d-flex" style="gap:8px; color:#6c757d; font-size:.75rem;">
+                <span style="flex:1; text-align:center;">W1</span><span style="flex:1; text-align:center;">W2</span><span style="flex:1; text-align:center;">W3</span><span style="flex:1; text-align:center;">W4</span><span style="flex:1; text-align:center;">W5</span><span style="flex:1; text-align:center;">W6</span><span style="flex:1; text-align:center;">W7</span>
+              </div>
+            </div></div>
+
+            <div class="col-lg-4"><div class="form-wrap">
+              <h5 class="mb-3">Top categories</h5>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between"><small>Soups &amp; Stews</small><small><strong>42%</strong></small></div>
+                <div class="progress" style="height:8px;"><div class="progress-bar" style="width:42%; background:var(--naija-green);"></div></div>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between"><small>Rice Dishes</small><small><strong>28%</strong></small></div>
+                <div class="progress" style="height:8px;"><div class="progress-bar" style="width:28%; background:var(--naija-gold);"></div></div>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between"><small>Snacks</small><small><strong>14%</strong></small></div>
+                <div class="progress" style="height:8px;"><div class="progress-bar" style="width:14%; background:var(--naija-red);"></div></div>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between"><small>Breakfast</small><small><strong>10%</strong></small></div>
+                <div class="progress" style="height:8px;"><div class="progress-bar" style="width:10%; background:#6B4FCF;"></div></div>
+              </div>
+              <div>
+                <div class="d-flex justify-content-between"><small>Other</small><small><strong>6%</strong></small></div>
+                <div class="progress" style="height:8px;"><div class="progress-bar" style="width:6%; background:#888;"></div></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-lg-6"><div class="form-wrap">
+              <h5 class="mb-3">Most viewed recipes</h5>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span>🥇 Classic Jollof Rice</span><strong>3,241 views</strong></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span>🥈 Beef Suya</span><strong>2,189 views</strong></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span>🥉 Egusi Soup</span><strong>1,847 views</strong></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span>Puff Puff</span><strong>1,235 views</strong></div>
+              <div class="d-flex justify-content-between py-2"><span>Chin Chin</span><strong>987 views</strong></div>
+            </div></div>
+            <div class="col-lg-6"><div class="form-wrap">
+              <h5 class="mb-3">Top contributors</h5>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span>🥇 @tunde_b</span><strong>22 reviews · 8 favs</strong></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span>🥈 @adaeze_cooks</span><strong>15 reviews · 14 favs</strong></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span>🥉 @chinwe_m</span><strong>11 reviews · 9 favs</strong></div>
+              <div class="d-flex justify-content-between py-2 border-bottom"><span>@foodie_lagos</span><strong>8 reviews · 12 favs</strong></div>
+              <div class="d-flex justify-content-between py-2"><span>@naija_chef</span><strong>6 reviews · 4 favs</strong></div>
+            </div></div>
+          </div>
+        </div>
+
+        <!-- ============ VIEW: SETTINGS ============ -->
+        <div class="admin-view" data-adminview="settings" style="display:none;">
+          <h2 class="mb-3"><i class="bi bi-gear"></i> Site Settings</h2>
+
+          <div class="row g-3">
+            <div class="col-lg-6">
+              <div class="form-wrap mb-3">
+                <h5 class="mb-3">General</h5>
+                <div class="mb-3"><label class="form-label">Site name</label><input class="form-control" value="NaijaCipe"></div>
+                <div class="mb-3"><label class="form-label">Tagline</label><input class="form-control" value="Authentic Nigerian recipes, at your fingertips."></div>
+                <div class="mb-3"><label class="form-label">Contact email</label><input class="form-control" type="email" value="hello@naijacipe.app"></div>
+                <div class="mb-3"><label class="form-label">Recipes per page</label><input class="form-control" type="number" value="12"></div>
+                <button class="btn btn-naija">Save changes</button>
+              </div>
+
+              <div class="form-wrap">
+                <h5 class="mb-3">Registration &amp; submission</h5>
+                <div class="mb-3">
+                  <label class="form-label">User registration</label>
+                  <select class="form-select"><option>Open — anyone can sign up</option><option>Invite-only</option><option>Closed</option></select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Who can submit recipes?</label>
+                  <select class="form-select"><option>Any logged-in user (with review)</option><option>Verified users only</option><option>Admin only</option></select>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="s1" checked>
+                  <label class="form-check-label" for="s1">Require email verification on signup</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                  <input class="form-check-input" type="checkbox" id="s2" checked>
+                  <label class="form-check-label" for="s2">Auto-approve reviews</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="s3">
+                  <label class="form-check-label" for="s3">Maintenance mode (site offline)</label>
+                </div>
+                <button class="btn btn-naija">Save changes</button>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="form-wrap mb-3">
+                <h5 class="mb-3">Homepage</h5>
+                <div class="mb-3"><label class="form-label">Featured recipes (4)</label>
+                  <select class="form-select mb-2"><option>Classic Jollof Rice</option></select>
+                  <select class="form-select mb-2"><option>Egusi Soup</option></select>
+                  <select class="form-select mb-2"><option>Beef Suya</option></select>
+                  <select class="form-select"><option>Chin Chin</option></select>
+                </div>
+                <button class="btn btn-naija">Save changes</button>
+              </div>
+
+              <div class="form-wrap">
+                <h5 class="mb-3">Danger zone</h5>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+                  <div><strong>Rebuild search index</strong><br><small class="text-muted">Full-text index for recipe search.</small></div>
+                  <button class="btn btn-sm btn-naija-outline">Rebuild</button>
+                </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-3" style="border-bottom: 1px solid var(--naija-gray-200);">
+                  <div><strong>Clear cache</strong><br><small class="text-muted">Flush all server-side caches.</small></div>
+                  <button class="btn btn-sm btn-naija-outline">Clear</button>
+                </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                  <div><strong class="text-danger">Export all data</strong><br><small class="text-muted">Download SQLite .db file + uploads folder.</small></div>
+                  <button class="btn btn-sm btn-outline-danger">Export</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 10: ADD / EDIT RECIPE                             -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="addrecipe">
+  <div class="container py-4">
+    <nav class="mb-3">
+      <ol class="breadcrumb" style="font-size:.88rem;">
+        <li class="breadcrumb-item"><a data-go="admin" style="color:var(--naija-green);">Admin</a></li>
+        <li class="breadcrumb-item">Recipes</li>
+        <li class="breadcrumb-item active">Add Recipe</li>
+      </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2><i class="bi bi-plus-circle text-naija-green"></i> Add New Recipe</h2>
+      <div class="d-flex gap-2">
+        <button class="btn btn-naija-outline">Save as draft</button>
+        <button class="btn btn-naija">Publish</button>
+      </div>
+    </div>
+
+    <form class="form-wrap">
+      <div class="row g-4">
+        <div class="col-md-8">
+          <h5 class="mb-3">Basic info</h5>
+          <div class="mb-3">
+            <label class="form-label">Recipe title *</label>
+            <input type="text" class="form-control" placeholder="e.g. Classic Jollof Rice" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Short description *</label>
+            <textarea class="form-control" rows="2" placeholder="One or two sentences to entice readers..." required></textarea>
+          </div>
+
+          <h5 class="mb-3 mt-4">Ingredients</h5>
+          <p class="text-muted small">One ingredient per line — e.g. "2 cups egusi seeds, ground"</p>
+          <textarea class="form-control" rows="7" placeholder="2 cups egusi seeds, ground&#10;500g assorted meat&#10;1 cup palm oil&#10;..."></textarea>
+
+          <h5 class="mb-3 mt-4">Instructions</h5>
+          <p class="text-muted small">One step per line — they will be numbered automatically.</p>
+          <textarea class="form-control" rows="8" placeholder="Season the meat and boil for 20 minutes...&#10;Fry onions and add egusi paste...&#10;..."></textarea>
+
+          <h5 class="mb-3 mt-4">Video tutorial</h5>
+          <div class="mb-3">
+            <label class="form-label">YouTube URL (optional)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="bi bi-youtube" style="color:#ff0000;"></i></span>
+              <input type="url" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+            </div>
+            <small class="text-muted">Paste a YouTube link — the video will be embedded on the recipe page.</small>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <h5 class="mb-3">Details</h5>
+          <div class="mb-3">
+            <label class="form-label">Category *</label>
+            <select class="form-select" required>
+              <option value="">Choose...</option>
+              <option>Soups &amp; Stews</option>
+              <option>Rice Dishes</option>
+              <option>Swallow</option>
+              <option>Snacks</option>
+              <option>Drinks</option>
+              <option>Breakfast</option>
+              <option>Grills &amp; BBQ</option>
+            </select>
+          </div>
+          <div class="row g-2">
+            <div class="col-6 mb-3">
+              <label class="form-label">Prep (min) *</label>
+              <input type="number" class="form-control" placeholder="15" min="1" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">Cook (min) *</label>
+              <input type="number" class="form-control" placeholder="45" min="1" required>
+            </div>
+          </div>
+          <div class="row g-2">
+            <div class="col-6 mb-3">
+              <label class="form-label">Servings *</label>
+              <input type="number" class="form-control" placeholder="6" min="1" required>
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">Difficulty *</label>
+              <select class="form-select" required>
+                <option value="">Choose...</option>
+                <option>Easy</option>
+                <option selected>Medium</option>
+                <option>Hard</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cover image URL</label>
+            <input type="url" class="form-control" placeholder="https://...">
+            <small class="text-muted">Or upload file (in production).</small>
+          </div>
+
+          <div class="mt-4 p-3" style="background:var(--naija-cream); border-radius:10px;">
+            <strong><i class="bi bi-lightbulb"></i> Preview</strong>
+            <div class="recipe-card mt-2" style="box-shadow:none;">
+              <div class="img-placeholder img-egusi" data-label="Your Recipe" style="height:140px;"><span class="time-badge">60 min</span></div>
+              <div class="body"><span class="category-tag">Soups &amp; Stews</span><h5 style="font-size:.95rem;">Your recipe title...</h5></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 12: NIGERIAN STORES IN SHEFFIELD                  -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="stores">
+  <!-- Hero -->
+  <div class="hero" style="padding: 3rem 0 2rem;">
+    <div class="container text-center">
+      <span class="hero-badge">LOCAL INGREDIENTS GUIDE</span>
+      <h1>Where to shop in Sheffield</h1>
+      <p class="lead mx-auto mt-3" style="max-width:680px;">
+        A community-curated list of Nigerian &amp; African grocery stores around Sheffield that stock everything you need — from egusi and ogbono to fresh yam, palm oil, stockfish, and scotch bonnet peppers.
+      </p>
+    </div>
+  </div>
+
+  <div class="container py-4">
+
+    <!-- Filter / search bar -->
+    <div class="form-wrap mb-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-5">
+          <label class="form-label small fw-semibold">Search stores</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" placeholder="e.g. 'egusi', 'yam', or store name…">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-semibold">Area</label>
+          <select class="form-select">
+            <option>All Sheffield areas</option>
+            <option>City Centre</option>
+            <option>London Road (S2)</option>
+            <option>Spital Hill (S4)</option>
+            <option>Abbeydale Road (S7)</option>
+            <option>Moor Market</option>
+            <option>Online / Delivery</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label small fw-semibold">Sort by</label>
+          <select class="form-select">
+            <option>Nearest</option>
+            <option>Top rated</option>
+            <option>Most reviewed</option>
+            <option>A–Z</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-grid">
+          <button class="btn btn-naija"><i class="bi bi-funnel"></i> Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary band -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h4 class="mb-0">Showing 6 stores</h4>
+        <small class="text-muted">Last updated April 2026 · Community verified</small>
+      </div>
+      <div class="btn-group btn-group-sm" role="group" aria-label="View toggle">
+        <button type="button" class="btn btn-naija active"><i class="bi bi-grid-3x3-gap"></i> Grid</button>
+        <button type="button" class="btn btn-naija-outline"><i class="bi bi-geo-alt"></i> Map view</button>
+        <button type="button" class="btn btn-naija-outline"><i class="bi bi-list-ul"></i> List</button>
+      </div>
+    </div>
+
+    <!-- Store cards grid -->
+    <div class="row g-4">
+
+      <!-- Store 1: Zaonmart -->
+      <div class="col-md-6 col-lg-4">
+        <div class="recipe-card h-100">
+          <div class="recipe-img" style="background: linear-gradient(135deg, #0B6E4F 0%, #1C8E6A 100%); position:relative;">
+            <span class="position-absolute top-0 start-0 m-2 badge" style="background:var(--naija-gold); color:var(--naija-dark);"><i class="bi bi-star-fill"></i> Featured</span>
+            <span class="position-absolute top-0 end-0 m-2 badge bg-success"><i class="bi bi-check-circle-fill"></i> Verified</span>
+            <div style="position:absolute; bottom:10px; left:12px; color:#fff; font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,.4);">Zaonmart</div>
+          </div>
+          <div class="recipe-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="mb-0">Zaonmart African Food Store</h5>
+              <span class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.8</span>
+            </div>
+            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill"></i> Sheffield, South Yorkshire · Delivery across the UK</p>
+            <p class="small mb-2"><strong>Specialties:</strong> Fresh yam, plantain, egusi, ogbono, dried fish, palm oil, scotch bonnets, African food boxes.</p>
+            <div class="mb-3">
+              <span class="badge rounded-pill bg-light text-dark me-1">Fresh produce</span>
+              <span class="badge rounded-pill bg-light text-dark me-1">Spices</span>
+              <span class="badge rounded-pill bg-light text-dark">Delivery</span>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="https://www.zaonmart.co.uk/" target="_blank" rel="noopener" class="btn btn-sm btn-naija flex-fill"><i class="bi bi-globe"></i> Website</a>
+              <button class="btn btn-sm btn-naija-outline"><i class="bi bi-geo-alt"></i> Directions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store 2: Nxtion Food Market -->
+      <div class="col-md-6 col-lg-4">
+        <div class="recipe-card h-100">
+          <div class="recipe-img" style="background: linear-gradient(135deg, #E3A71C 0%, #B8851A 100%); position:relative;">
+            <span class="position-absolute top-0 end-0 m-2 badge bg-success"><i class="bi bi-check-circle-fill"></i> Verified</span>
+            <div style="position:absolute; bottom:10px; left:12px; color:#fff; font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,.4);">Nxtion</div>
+          </div>
+          <div class="recipe-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="mb-0">Nxtion Food Market</h5>
+              <span class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.6</span>
+            </div>
+            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill"></i> Sheffield · In-store &amp; online</p>
+            <p class="small mb-2"><strong>Specialties:</strong> Fufu, gari, yam, plantain, grains, seafood, pantry staples, spices &amp; organic produce.</p>
+            <div class="mb-3">
+              <span class="badge rounded-pill bg-light text-dark me-1">Grains</span>
+              <span class="badge rounded-pill bg-light text-dark me-1">Seafood</span>
+              <span class="badge rounded-pill bg-light text-dark">Online shop</span>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="https://nxtionfoodmarket.com/" target="_blank" rel="noopener" class="btn btn-sm btn-naija flex-fill"><i class="bi bi-globe"></i> Website</a>
+              <button class="btn btn-sm btn-naija-outline"><i class="bi bi-geo-alt"></i> Directions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store 3: Alaoma Food Hub -->
+      <div class="col-md-6 col-lg-4">
+        <div class="recipe-card h-100">
+          <div class="recipe-img" style="background: linear-gradient(135deg, #D64545 0%, #8E2929 100%); position:relative;">
+            <span class="position-absolute top-0 start-0 m-2 badge" style="background:var(--naija-gold); color:var(--naija-dark);"><i class="bi bi-shop"></i> Market stall</span>
+            <div style="position:absolute; bottom:10px; left:12px; color:#fff; font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,.4);">Alaoma</div>
+          </div>
+          <div class="recipe-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="mb-0">Alaoma Food Hub</h5>
+              <span class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.5</span>
+            </div>
+            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill"></i> Moor Market, Sheffield City Centre</p>
+            <p class="small mb-2"><strong>Specialties:</strong> Afro-Caribbean groceries, West African, West Indian &amp; Indian produce, fresh vegetables, spices.</p>
+            <div class="mb-3">
+              <span class="badge rounded-pill bg-light text-dark me-1">Afro-Caribbean</span>
+              <span class="badge rounded-pill bg-light text-dark me-1">Fresh produce</span>
+              <span class="badge rounded-pill bg-light text-dark">City centre</span>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="https://sheffieldmarkets.com/traders/moor-market/alaoma-food-hub" target="_blank" rel="noopener" class="btn btn-sm btn-naija flex-fill"><i class="bi bi-globe"></i> Website</a>
+              <button class="btn btn-sm btn-naija-outline"><i class="bi bi-geo-alt"></i> Directions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store 4: Banky's Kitchen -->
+      <div class="col-md-6 col-lg-4">
+        <div class="recipe-card h-100">
+          <div class="recipe-img" style="background: linear-gradient(135deg, #6B4FCF 0%, #3F2D80 100%); position:relative;">
+            <span class="position-absolute top-0 start-0 m-2 badge" style="background:var(--naija-cream); color:var(--naija-dark);"><i class="bi bi-bag-heart"></i> Nigerian specialist</span>
+            <div style="position:absolute; bottom:10px; left:12px; color:#fff; font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,.4);">Banky's</div>
+          </div>
+          <div class="recipe-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="mb-0">Banky's Kitchen</h5>
+              <span class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.7</span>
+            </div>
+            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill"></i> Sheffield &amp; Birmingham</p>
+            <p class="small mb-2"><strong>Specialties:</strong> Ready-made Nigerian meals, jollof rice, egusi soup, moi moi, small chops — cooked &amp; ingredient packs.</p>
+            <div class="mb-3">
+              <span class="badge rounded-pill bg-light text-dark me-1">Ready meals</span>
+              <span class="badge rounded-pill bg-light text-dark me-1">Small chops</span>
+              <span class="badge rounded-pill bg-light text-dark">Catering</span>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="https://bankyskitchen.co.uk/" target="_blank" rel="noopener" class="btn btn-sm btn-naija flex-fill"><i class="bi bi-globe"></i> Website</a>
+              <button class="btn btn-sm btn-naija-outline"><i class="bi bi-geo-alt"></i> Directions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store 5: Spital Hill area -->
+      <div class="col-md-6 col-lg-4">
+        <div class="recipe-card h-100">
+          <div class="recipe-img" style="background: linear-gradient(135deg, #075238 0%, #0B6E4F 100%); position:relative;">
+            <div style="position:absolute; bottom:10px; left:12px; color:#fff; font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,.4);">Spital Hill Int'l Foods</div>
+          </div>
+          <div class="recipe-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="mb-0">Spital Hill International Foods</h5>
+              <span class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.3</span>
+            </div>
+            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill"></i> 24–26 Spital Hill, S4 7LG</p>
+            <p class="small mb-2"><strong>Specialties:</strong> African &amp; Caribbean groceries, frozen meats, dried fish, beans, spices, bulk bags of rice.</p>
+            <div class="mb-3">
+              <span class="badge rounded-pill bg-light text-dark me-1">Bulk buys</span>
+              <span class="badge rounded-pill bg-light text-dark me-1">Frozen</span>
+              <span class="badge rounded-pill bg-light text-dark">Dried goods</span>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-naija flex-fill"><i class="bi bi-telephone"></i> Call store</button>
+              <button class="btn btn-sm btn-naija-outline"><i class="bi bi-geo-alt"></i> Directions</button>
+            </div>
+            <small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> Community listing — please verify before visiting.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store 6: London Road area -->
+      <div class="col-md-6 col-lg-4">
+        <div class="recipe-card h-100">
+          <div class="recipe-img" style="background: linear-gradient(135deg, #E3A71C 0%, #0B6E4F 100%); position:relative;">
+            <div style="position:absolute; bottom:10px; left:12px; color:#fff; font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,.4);">London Road Afro Store</div>
+          </div>
+          <div class="recipe-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="mb-0">London Road Afro Store</h5>
+              <span class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.2</span>
+            </div>
+            <p class="text-muted small mb-2"><i class="bi bi-geo-alt-fill"></i> London Road, S2 · City centre side</p>
+            <p class="small mb-2"><strong>Specialties:</strong> Yam tubers, plantain, garri, pepper soup spice, locust bean (iru), bitter leaf, snails &amp; periwinkle.</p>
+            <div class="mb-3">
+              <span class="badge rounded-pill bg-light text-dark me-1">Yam tubers</span>
+              <span class="badge rounded-pill bg-light text-dark me-1">Bitter leaf</span>
+              <span class="badge rounded-pill bg-light text-dark">Iru</span>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-naija flex-fill"><i class="bi bi-telephone"></i> Call store</button>
+              <button class="btn btn-sm btn-naija-outline"><i class="bi bi-geo-alt"></i> Directions</button>
+            </div>
+            <small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> Community listing — please verify before visiting.</small>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ingredient mini-guide -->
+    <div class="form-wrap mt-5" style="background: var(--naija-cream); border-color: var(--naija-gold);">
+      <div class="row g-4 align-items-center">
+        <div class="col-md-8">
+          <h4 class="mb-2"><i class="bi bi-basket3-fill text-warning"></i> Hard-to-find ingredients cheat sheet</h4>
+          <p class="mb-0 small">Most Sheffield stores above stock these pantry essentials for Nigerian cooking: <strong>egusi (melon seeds), ogbono, palm oil, stockfish, crayfish, locust bean (iru), bitter leaf, uziza, ehuru, dry pepper, scotch bonnets, plantain, yam, cocoyam, ugwu, bitter-leaf, garri, fufu flour &amp; pounded yam flour.</strong></p>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <button class="btn btn-gold"><i class="bi bi-download"></i> Print shopping list</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Community submit CTA -->
+    <div class="text-center mt-5 py-4" style="border-top: 1px dashed var(--naija-gray-200);">
+      <h5 class="mb-2"><i class="bi bi-plus-circle-fill text-success"></i> Know a store we missed?</h5>
+      <p class="text-muted mb-3">Help fellow cooks in Sheffield. Suggest a Nigerian or African grocery store to add to this list.</p>
+      <button class="btn btn-naija"><i class="bi bi-shop-window"></i> Submit a store</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 13: ABOUT                                         -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="about">
+  <div class="hero" style="padding: 4rem 0;">
+    <div class="container text-center">
+      <span class="hero-badge">OUR STORY</span>
+      <h1>Preserving Nigerian flavours, one recipe at a time.</h1>
+      <p class="lead mx-auto mt-3" style="max-width:600px;">NaijaCipe was built by three students who missed home cooking. What started as a shared Google Doc of family recipes is now a platform for anyone who wants to cook Nigerian.</p>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <div class="row g-4">
+      <div class="col-md-4 text-center">
+        <div class="howit-num">🎯</div>
+        <h4>Our mission</h4>
+        <p class="text-muted">Make authentic Nigerian recipes accessible and searchable, with enough detail that a first-time cook can succeed.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="howit-num">🌍</div>
+        <h4>Who it's for</h4>
+        <p class="text-muted">Diaspora cooks, curious food lovers, and anyone who wants to cook Nigerian beyond Jollof Rice.</p>
+      </div>
+      <div class="col-md-4 text-center">
+        <div class="howit-num">⚙️</div>
+        <h4>Built with</h4>
+        <p class="text-muted">Python, Flask, SQLite, HTML/CSS, Bootstrap 5. Everything you're learning in EFSSD.</p>
+      </div>
+    </div>
+
+    <hr class="my-5">
+
+    <h3 class="text-center mb-4">Meet the team</h3>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-3 col-sm-6 text-center">
+        <div class="review-avatar mx-auto mb-2" style="width:80px; height:80px; font-size:2rem;">D</div>
+        <strong>Daniel Akpoguma</strong><br>
+        <small class="text-muted">Backend · Flask routes &amp; DB</small>
+      </div>
+      <div class="col-md-3 col-sm-6 text-center">
+        <div class="review-avatar mx-auto mb-2" style="width:80px; height:80px; font-size:2rem; background:var(--naija-gold); color:var(--naija-dark);">T2</div>
+        <strong>Teammate 2</strong><br>
+        <small class="text-muted">Frontend · Bootstrap &amp; UX</small>
+      </div>
+      <div class="col-md-3 col-sm-6 text-center">
+        <div class="review-avatar mx-auto mb-2" style="width:80px; height:80px; font-size:2rem; background:var(--naija-red);">T3</div>
+        <strong>Teammate 3</strong><br>
+        <small class="text-muted">Testing · PM &amp; Documentation</small>
+      </div>
+    </div>
+
+    <hr class="my-5">
+
+    <div class="row g-4 align-items-center">
+      <div class="col-md-6">
+        <h3>Get in touch</h3>
+        <p class="text-muted">Questions, feedback, or a recipe idea? Drop us a line.</p>
+        <ul class="list-unstyled">
+          <li class="mb-2"><i class="bi bi-envelope text-naija-green me-2"></i> hello@naijacipe.app</li>
+          <li class="mb-2"><i class="bi bi-github text-naija-green me-2"></i> github.com/naijacipe/app</li>
+          <li class="mb-2"><i class="bi bi-geo-alt text-naija-green me-2"></i> Sheffield Hallam University</li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <div class="form-wrap">
+          <div class="mb-3"><label class="form-label">Your name</label><input class="form-control" placeholder="Jane Doe"></div>
+          <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" placeholder="jane@example.com"></div>
+          <div class="mb-3"><label class="form-label">Message</label><textarea class="form-control" rows="3"></textarea></div>
+          <button class="btn btn-naija w-100">Send message</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- SCREEN 12: 404                                           -->
+<!-- ======================================================= -->
+<section class="screen" data-screen="notfound">
+  <div class="container py-5 text-center">
+    <div style="padding: 5rem 0;">
+      <h1 class="display-font" style="font-size: 8rem; color: var(--naija-gold); margin:0;">404</h1>
+      <h2 class="mb-3">Recipe not found</h2>
+      <p class="text-muted">Looks like this dish went off the menu. Let's get you back to the kitchen.</p>
+      <div class="mt-4 d-flex gap-2 justify-content-center">
+        <a class="btn btn-naija" data-go="landing"><i class="bi bi-house-door"></i> Back home</a>
+        <a class="btn btn-naija-outline" data-go="browse">Browse recipes</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<!-- FOOTER                                                   -->
+<!-- ======================================================= -->
+<footer class="footer-naija">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="brand-logo" style="color:#fff !important;">Naija<span class="dot">.</span>Cipe</div>
+        <p class="mt-2 small" style="opacity:.7;">Authentic Nigerian recipes for home cooks everywhere. Built at Sheffield Hallam University for the EFSSD module.</p>
+        <div class="mt-3">
+          <a href="#" class="me-2 fs-5"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="me-2 fs-5"><i class="bi bi-twitter"></i></a>
+          <a href="#" class="me-2 fs-5"><i class="bi bi-youtube"></i></a>
+          <a href="#" class="fs-5"><i class="bi bi-github"></i></a>
+        </div>
+      </div>
+      <div class="col-md-2 col-6">
+        <h6>Explore</h6>
+        <a href="#" data-go="browse" class="d-block mb-2">Recipes</a>
+        <a href="#" data-go="stores" class="d-block mb-2">Sheffield stores</a>
+        <a href="#" class="d-block mb-2">Top rated</a>
+        <a href="#" class="d-block mb-2">Latest</a>
+      </div>
+      <div class="col-md-2 col-6">
+        <h6>Account</h6>
+        <a href="#" data-go="login" class="d-block mb-2">Log in</a>
+        <a href="#" data-go="register" class="d-block mb-2">Sign up</a>
+        <a href="#" data-go="dashboard" class="d-block mb-2">Profile</a>
+        <a href="#" data-go="favourites" class="d-block mb-2">My favourites</a>
+        <a href="#" data-go="myreviews" class="d-block mb-2">My reviews</a>
+      </div>
+      <div class="col-md-2 col-6">
+        <h6>Company</h6>
+        <a href="#" data-go="about" class="d-block mb-2">About</a>
+        <a href="#" class="d-block mb-2">Contact</a>
+        <a href="#" class="d-block mb-2">Privacy</a>
+        <a href="#" class="d-block mb-2">Terms</a>
+      </div>
+      <div class="col-md-2 col-6">
+        <h6>Stack</h6>
+        <span class="d-block mb-2 small" style="opacity:.7;">Python · Flask</span>
+        <span class="d-block mb-2 small" style="opacity:.7;">SQLite · SQLAlchemy</span>
+        <span class="d-block mb-2 small" style="opacity:.7;">Bootstrap 5</span>
+        <span class="d-block mb-2 small" style="opacity:.7;">Jinja2</span>
+      </div>
+    </div>
+    <div class="copy d-flex justify-content-between flex-wrap">
+      <span>© 2026 NaijaCipe — EFSSD Group Project</span>
+      <span>Made with <i class="bi bi-heart-fill text-danger"></i> &amp; plenty of jollof</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Floating screen label -->
+<div class="screen-label" id="screenLabel">Screen 1 — Landing</div>
+
+<!-- ======================================================= -->
+<!-- JS                                                       -->
+<!-- ======================================================= -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const screenLabels = {
+    landing: '1 — Landing',
+    register: '2 — Register',
+    login: '3 — Login',
+    browse: '4 — Browse Recipes',
+    detail: '5 — Recipe Detail',
+    dashboard: '6 — User Dashboard',
+    favourites: '7 — My Favourites',
+    myreviews: '8 — My Reviews',
+    usersettings: '9 — Account Settings',
+    admin: '10 — Admin Dashboard',
+    addrecipe: '11 — Add / Edit Recipe',
+    stores: '12 — Sheffield Stores',
+    about: '13 — About',
+    notfound: '14 — 404 Not Found',
+  };
+
+  const authOnlyScreens = ['dashboard','favourites','myreviews','usersettings','admin','addrecipe'];
+
+  let loggedIn = false;
+  let isAdmin = false;
+
+  function goTo(name) {
+    // If auth-only screen and not logged in, redirect to login
+    if (authOnlyScreens.includes(name) && !loggedIn) {
+      // auto-login as appropriate role for prototype
+      if (name === 'admin' || name === 'addrecipe') {
+        loginAs('admin', false);
+      } else {
+        loginAs('user', false);
+      }
+    }
+
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.querySelector(`.screen[data-screen="${name}"]`);
+    if (el) el.classList.add('active');
+
+    document.querySelectorAll('.mockup-controls .chip').forEach(c => c.classList.remove('active'));
+    const chip = document.querySelector(`.mockup-controls .chip[data-go="${name}"]`);
+    if (chip) chip.classList.add('active');
+
+    const label = document.getElementById('screenLabel');
+    label.textContent = 'Screen ' + (screenLabels[name] || name);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function loginAs(role, navigate = true) {
+    loggedIn = true;
+    isAdmin = (role === 'admin');
+    document.getElementById('authButtons').classList.add('d-none');
+    document.getElementById('userButtons').classList.remove('d-none');
+    if (navigate) {
+      goTo(isAdmin ? 'admin' : 'dashboard');
+    }
+  }
+
+  function logout() {
+    loggedIn = false; isAdmin = false;
+    document.getElementById('authButtons').classList.remove('d-none');
+    document.getElementById('userButtons').classList.add('d-none');
+    goTo('landing');
+  }
+
+  function switchTab(e, id) {
+    e.preventDefault();
+    document.querySelectorAll('#recipeTabs .nav-link').forEach(l => l.classList.remove('active'));
+    e.target.closest('.nav-link').classList.add('active');
+    document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+    document.getElementById('tab-' + id).style.display = 'block';
+  }
+
+  // Admin view switching (inside the Admin Dashboard screen)
+  function showAdminView(view) {
+    // Toggle panels
+    document.querySelectorAll('.admin-view').forEach(v => {
+      v.style.display = (v.getAttribute('data-adminview') === view) ? 'block' : 'none';
+    });
+    // Active state on sidebar links
+    document.querySelectorAll('.admin-link').forEach(l => {
+      l.classList.toggle('active', l.getAttribute('data-adminview') === view);
+    });
+    // Scroll the admin content to top
+    const adminScreen = document.querySelector('.screen[data-screen="admin"]');
+    if (adminScreen) window.scrollTo({ top: adminScreen.offsetTop - 20, behavior: 'smooth' });
+  }
+
+  // Global click delegation
+  document.addEventListener('click', (e) => {
+    // [data-adminview] — admin sidebar link: switch internal admin view only
+    const adminLink = e.target.closest('[data-adminview]');
+    if (adminLink && adminLink.classList.contains('admin-link')) {
+      e.preventDefault();
+      showAdminView(adminLink.getAttribute('data-adminview'));
+      return;
+    }
+
+    // [data-adminview-go] — jump from anywhere into a specific admin view
+    const adminGo = e.target.closest('[data-adminview-go]');
+    if (adminGo) {
+      e.preventDefault();
+      goTo('admin');
+      showAdminView(adminGo.getAttribute('data-adminview-go'));
+      return;
+    }
+
+    // [data-go] — top-level screen navigation
+    const target = e.target.closest('[data-go]');
+    if (target) {
+      e.preventDefault();
+      goTo(target.getAttribute('data-go'));
+      // When we land on admin via data-go, default to the dashboard sub-view
+      if (target.getAttribute('data-go') === 'admin') {
+        showAdminView('dashboard');
+      }
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+
+  // Init
+  goTo('landing');
+</script>
+</body>
+</html>
