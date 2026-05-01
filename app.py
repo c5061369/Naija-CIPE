@@ -54,9 +54,16 @@ def browse():
         {"slug": "banana-bread",   "title": "Banana Nut Bread",         "category": "Snacks",      "time": 70, "rating": 4.2, "reviews": 38,  "difficulty": "Easy",   "img_class": "img-bananabread", "label": "Banana Bread"},
         {"slug": "okra-soup",      "title": "Okra Soup (Draw Soup)",    "category": "Soups",       "time": 45, "rating": 4.5, "reviews": 55,  "difficulty": "Easy",   "img_class": "img-okra",        "label": "Okra Soup"},
     ]
+    categories = [
+        {"name": "Soups & Stews"}, {"name": "Rice Dishes"}, {"name": "Swallow"},
+        {"name": "Snacks"}, {"name": "Drinks"}, {"name": "Breakfast"}, {"name": "Grills"},
+    ]
+    pagination = {"page": 1, "per_page": 12, "pages": 1, "has_prev": False, "has_next": False,
+                  "prev_num": None, "next_num": None}
     sort_by = request.args.get("sort", "popular")
     category = request.args.get("category", "all")
-    return render_template("screens/browse.html", recipes=recipes, sort_by=sort_by, category=category, total=214)
+    return render_template("screens/browse.html", recipes=recipes, categories=categories,
+                           pagination=pagination, sort_by=sort_by, category=category, total=len(recipes))
 
 
 @app.route("/recipes/<slug>")
@@ -210,6 +217,12 @@ def login_required(f):
 @app.route("/dashboard")
 @login_required
 def dashboard():
+    username = session.get("username", "user")
+    user = {
+        "initial": username[0].upper(),
+        "full_name": "Adaeze Cooks" if username == "adaeze_cooks" else username.title(),
+        "created_at": datetime(2024, 1, 15),
+    }
     stats = {"favourites": 14, "reviews": 8, "recipes_tried": 22, "streak": 3}
     activity = [
         {"icon": "bi-heart-fill",     "icon_bg": "#FFE0E0", "icon_color": "var(--naija-red)",      "text": "You favourited <strong>Classic Jollof Rice</strong>",       "date": "3 days ago",  "action_url": url_for("recipe_detail", slug="jollof-rice"), "action_label": "View"},
@@ -217,7 +230,7 @@ def dashboard():
         {"icon": "bi-heart-fill",     "icon_bg": "#FFF3D1", "icon_color": "var(--naija-gold-dark)","text": "You favourited <strong>Spicy Beef Suya</strong>",            "date": "1 week ago",  "action_url": url_for("recipe_detail", slug="suya"),        "action_label": "View"},
         {"icon": "bi-chat-dots-fill", "icon_bg": "#E8E4FF", "icon_color": "#6B4FCF",              "text": "You reviewed <strong>Puff Puff</strong> — gave it 4 stars",  "date": "2 weeks ago", "action_url": url_for("my_reviews"), "action_label": "See"},
     ]
-    return render_template("screens/dashboard.html", stats=stats, activity=activity)
+    return render_template("screens/dashboard.html", user=user, stats=stats, activity=activity)
 
 
 @app.route("/favourites")

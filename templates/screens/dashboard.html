@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import dashboard_tabs %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  {# Profile header #}
+  <div class="row mb-4 align-items-center">
+    <div class="col-auto">
+      <div class="review-avatar" style="width:72px; height:72px; font-size:1.8rem;">{{ user.initial }}</div>
+    </div>
+    <div class="col">
+      <h2 class="mb-1">Welcome back, {{ user.full_name.split()[0] }} <span style="color:var(--naija-gold);">👋</span></h2>
+      <p class="text-muted mb-0">
+        Member since {{ user.created_at.strftime('%B %Y') }} · @{{ current_user }}
+      </p>
+    </div>
+    <div class="col-auto">
+      <a href="{{ url_for('login') }}" class="btn btn-naija-outline">
+        <i class="bi bi-pencil"></i> Edit profile
+      </a>
+    </div>
+  </div>
+
+  {# Stats #}
+  <div class="row g-3 mb-4">
+    {% set stat_items = [
+      ("bi-heart-fill",    "#FFE0E0", "var(--naija-red)",       stats.favourites,    "Favourite recipes"),
+      ("bi-chat-dots-fill","#E0F4EC", "var(--naija-green)",     stats.reviews,       "Reviews posted"),
+      ("bi-egg-fried",     "#FFF3D1", "var(--naija-gold-dark)", stats.recipes_tried, "Recipes tried"),
+      ("bi-trophy-fill",   "#E8E4FF", "#6B4FCF",                stats.streak,        "Day cooking streak"),
+    ] %}
+    {% for icon, bg, color, value, label in stat_items %}
+    <div class="col-md-3 col-6">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:{{ bg }}; color:{{ color }};">
+          <i class="bi {{ icon }}"></i>
+        </div>
+        <h3>{{ value }}</h3>
+        <small>{{ label }}</small>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Tab nav #}
+  {{ dashboard_tabs('overview') }}
+
+  <div class="row g-3">
+    {# Activity feed #}
+    <div class="col-lg-8">
+      <div class="form-wrap">
+        <h5 class="mb-3"><i class="bi bi-clock-history"></i> Recent activity</h5>
+        {% for item in activity %}
+        <div class="d-flex align-items-center gap-3 py-3
+                    {% if not loop.last %}border-bottom{% endif %}"
+             style="border-color: var(--naija-gray-200);">
+          <div class="stat-icon" style="background:{{ item.icon_bg }}; color:{{ item.icon_color }}; margin:0;">
+            <i class="bi {{ item.icon }}"></i>
+          </div>
+          <div class="flex-grow-1">
+            {{ item.text | safe }}<br>
+            <small class="text-muted">{{ item.date }}</small>
+          </div>
+          <a class="btn btn-sm btn-naija-outline" href="{{ item.action_url }}">{{ item.action_label }}</a>
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+          <i class="bi bi-clock-history fs-2 mb-2 d-block"></i>
+          No activity yet — go browse some recipes!
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Quick links #}
+    <div class="col-lg-4">
+      <div class="form-wrap mb-3">
+        <h6 class="mb-3">Quick links</h6>
+        <a class="btn btn-naija w-100 mb-2" href="{{ url_for('favourites') }}">
+          <i class="bi bi-heart"></i> View all favourites
+        </a>
+        <a class="btn btn-naija-outline w-100 mb-2" href="{{ url_for('my_reviews') }}">
+          <i class="bi bi-chat"></i> View all reviews
+        </a>
+        <a class="btn btn-naija-outline w-100 mb-2" href="{{ url_for('browse') }}">
+          <i class="bi bi-grid"></i> Browse recipes
+        </a>
+        <a class="btn btn-naija-outline w-100" href="{{ url_for('user_settings') }}">
+          <i class="bi bi-gear"></i> Account settings
+        </a>
+      </div>
+      <div class="form-wrap" style="background: var(--naija-cream); border-color: var(--naija-gold);">
+        <h6 class="mb-2"><i class="bi bi-lightbulb-fill text-warning"></i> Today's suggestion</h6>
+        <p class="mb-2 small">You love Nigerian food — try <strong>Efo Riro</strong> next, it's one of our top picks.</p>
+        <a class="btn btn-sm btn-gold" href="{{ url_for('recipe_detail', slug='efo-riro') }}">
+          See recipe →
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

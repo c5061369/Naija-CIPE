@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import dashboard_tabs %}
+{% block title %}Account Settings{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="mb-4">
+    <h2 class="mb-1"><i class="bi bi-gear-fill text-naija-green"></i> Account Settings</h2>
+    <small class="text-muted">Manage your profile, password and preferences.</small>
+  </div>
+
+  {{ dashboard_tabs('settings') }}
+
+  <div class="row g-3">
+
+    {# Left nav #}
+    <div class="col-lg-3">
+      <div class="form-wrap" style="padding:0.5rem;">
+        <a href="#profile-sec"  class="admin-link active" style="color:var(--naija-dark);"><i class="bi bi-person"></i> Profile</a>
+        <a href="#password-sec" class="admin-link"        style="color:var(--naija-dark);"><i class="bi bi-shield-lock"></i> Password</a>
+        <a href="#notify-sec"   class="admin-link"        style="color:var(--naija-dark);"><i class="bi bi-bell"></i> Notifications</a>
+        <a href="#privacy-sec"  class="admin-link"        style="color:var(--naija-dark);"><i class="bi bi-eye"></i> Privacy</a>
+        <a href="#danger-sec"   class="admin-link"        style="color:var(--naija-red);"><i class="bi bi-exclamation-triangle"></i> Danger zone</a>
+      </div>
+    </div>
+
+    {# Right content #}
+    <div class="col-lg-9">
+
+      {# Profile #}
+      <div class="form-wrap mb-3" id="profile-sec">
+        <h5 class="mb-3"><i class="bi bi-person"></i> Profile information</h5>
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="review-avatar" style="width:72px; height:72px; font-size:1.8rem;">{{ user.initial }}</div>
+          <div>
+            <button class="btn btn-sm btn-naija-outline"><i class="bi bi-camera"></i> Change photo</button>
+          </div>
+        </div>
+        <form method="POST" action="{{ url_for('user.update_profile') }}" novalidate>
+          {{ profile_form.hidden_tag() }}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Full name</label>
+              <input class="form-control {% if profile_form.full_name.errors %}is-invalid{% endif %}"
+                     name="full_name" value="{{ user.full_name }}">
+              {% for e in profile_form.full_name.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Username</label>
+              <input class="form-control {% if profile_form.username.errors %}is-invalid{% endif %}"
+                     name="username" value="{{ user.username }}">
+              {% for e in profile_form.username.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input class="form-control {% if profile_form.email.errors %}is-invalid{% endif %}"
+                     type="email" name="email" value="{{ user.email }}">
+              {% for e in profile_form.email.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Location (optional)</label>
+              <input class="form-control" name="location"
+                     placeholder="e.g. Lagos, Nigeria"
+                     value="{{ user.location or '' }}">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Bio</label>
+              <textarea class="form-control" name="bio" rows="2">{{ user.bio or '' }}</textarea>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-naija">Save changes</button>
+          </div>
+        </form>
+      </div>
+
+      {# Password #}
+      <div class="form-wrap mb-3" id="password-sec">
+        <h5 class="mb-3"><i class="bi bi-shield-lock"></i> Change password</h5>
+        <form method="POST" action="{{ url_for('user.update_password') }}" novalidate>
+          {{ password_form.hidden_tag() }}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Current password</label>
+              <input class="form-control {% if password_form.current_password.errors %}is-invalid{% endif %}"
+                     type="password" name="current_password" placeholder="••••••••">
+              {% for e in password_form.current_password.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">New password</label>
+              <input class="form-control {% if password_form.new_password.errors %}is-invalid{% endif %}"
+                     type="password" name="new_password" placeholder="At least 8 characters">
+              {% for e in password_form.new_password.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Confirm new password</label>
+              <input class="form-control {% if password_form.confirm_password.errors %}is-invalid{% endif %}"
+                     type="password" name="confirm_password" placeholder="Re-enter new password">
+              {% for e in password_form.confirm_password.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+          </div>
+          <div class="mt-3"><button type="submit" class="btn btn-naija">Update password</button></div>
+        </form>
+      </div>
+
+      {# Notifications #}
+      <div class="form-wrap mb-3" id="notify-sec">
+        <h5 class="mb-3"><i class="bi bi-bell"></i> Email notifications</h5>
+        <form method="POST" action="#">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% set notif_prefs = [
+            ("notify_comments",   user.notify_comments,   "Someone comments on my review"),
+            ("notify_digest",     user.notify_digest,     "Weekly featured recipes digest"),
+            ("notify_new_recipe", user.notify_new_recipe, "New recipe in a category I've favourited"),
+            ("notify_updates",    user.notify_updates,    "Product updates & news"),
+          ] %}
+          {% for field_name, checked, label in notif_prefs %}
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="{{ field_name }}"
+                   name="{{ field_name }}" {% if checked %}checked{% endif %}>
+            <label class="form-check-label" for="{{ field_name }}">{{ label }}</label>
+          </div>
+          {% endfor %}
+          <div class="mt-3"><button class="btn btn-naija">Save preferences</button></div>
+        </form>
+      </div>
+
+      {# Privacy #}
+      <div class="form-wrap mb-3" id="privacy-sec">
+        <h5 class="mb-3"><i class="bi bi-eye"></i> Privacy</h5>
+        <form method="POST" action="#">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% set privacy_prefs = [
+            ("privacy_show_reviews",    user.privacy_show_reviews,    "Show my reviews publicly with my username"),
+            ("privacy_show_favourites", user.privacy_show_favourites, "Allow others to see my favourites list"),
+            ("privacy_leaderboard",     user.privacy_leaderboard,     "Show my profile on the leaderboard"),
+          ] %}
+          {% for field_name, checked, label in privacy_prefs %}
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" id="{{ field_name }}"
+                   name="{{ field_name }}" {% if checked %}checked{% endif %}>
+            <label class="form-check-label" for="{{ field_name }}">{{ label }}</label>
+          </div>
+          {% endfor %}
+          <div class="mt-3"><button class="btn btn-naija">Save privacy settings</button></div>
+        </form>
+      </div>
+
+      {# Danger zone #}
+      <div class="form-wrap" id="danger-sec"
+           style="border: 1px solid #FFD7D7; background: #FFF8F8;">
+        <h5 class="mb-3 text-danger"><i class="bi bi-exclamation-triangle"></i> Danger zone</h5>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-3"
+             style="border-bottom: 1px solid #FFD7D7;">
+          <div>
+            <strong>Export my data</strong><br>
+            <small class="text-muted">Download a ZIP of all your reviews, favourites and profile info.</small>
+          </div>
+          <button class="btn btn-sm btn-naija-outline">Request export</button>
+        </div>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <strong class="text-danger">Delete my account</strong><br>
+            <small class="text-muted">This will permanently remove your account, reviews and favourites. This action cannot be undone.</small>
+          </div>
+          <form method="POST" action="{{ url_for('user.delete_account') }}"
+                onsubmit="return confirm('Permanently delete your account? This cannot be undone.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete account</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
