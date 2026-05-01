@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+
+{# Hero #}
+<div class="hero" style="padding: 4rem 0;">
+  <div class="container text-center">
+    <span class="hero-badge">OUR STORY</span>
+    <h1>Preserving Nigerian flavours, one recipe at a time.</h1>
+    <p class="lead mx-auto mt-3" style="max-width:600px;">
+      NaijaCipe was built by three students who missed home cooking. What started as a shared Google Doc
+      of family recipes is now a platform for anyone who wants to cook Nigerian.
+    </p>
+  </div>
+</div>
+
+<div class="container py-5">
+
+  {# Mission row #}
+  <div class="row g-4">
+    {% for emoji, heading, body in [
+      ("🎯","Our mission",  "Make authentic Nigerian recipes accessible and searchable, with enough detail that a first-time cook can succeed."),
+      ("🌍","Who it's for", "Diaspora cooks, curious food lovers, and anyone who wants to cook Nigerian beyond Jollof Rice."),
+      ("⚙️","Built with",   "Python, Flask, SQLite, HTML/CSS, Bootstrap 5. Everything you're learning in EFSSD."),
+    ] %}
+    <div class="col-md-4 text-center">
+      <div class="howit-num">{{ emoji }}</div>
+      <h4>{{ heading }}</h4>
+      <p class="text-muted">{{ body }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <hr class="my-5">
+
+  {# Team #}
+  <h3 class="text-center mb-4">Meet the team</h3>
+  <div class="row g-4 justify-content-center">
+    {% for member in team %}
+    <div class="col-md-3 col-sm-6 text-center">
+      <div class="review-avatar mx-auto mb-2"
+           style="width:80px; height:80px; font-size:2rem;
+                  {% if member.avatar_bg == 'gold' %}background:var(--naija-gold); color:var(--naija-dark);
+                  {% elif member.avatar_bg == 'red' %}background:var(--naija-red);
+                  {% endif %}">
+        {{ member.initial }}
+      </div>
+      <strong>{{ member.name }}</strong><br>
+      <small class="text-muted">{{ member.role }}</small>
+    </div>
+    {% endfor %}
+  </div>
+
+  <hr class="my-5">
+
+  {# Contact #}
+  <div class="row g-4 align-items-center">
+    <div class="col-md-6">
+      <h3>Get in touch</h3>
+      <p class="text-muted">Questions, feedback, or a recipe idea? Drop us a line.</p>
+      <ul class="list-unstyled">
+        <li class="mb-2"><i class="bi bi-envelope text-naija-green me-2"></i> hello@naijacipe.app</li>
+        <li class="mb-2"><i class="bi bi-github text-naija-green me-2"></i> github.com/naijacipe/app</li>
+        <li class="mb-2"><i class="bi bi-geo-alt text-naija-green me-2"></i> Sheffield Hallam University</li>
+      </ul>
+    </div>
+    <div class="col-md-6">
+      <div class="form-wrap">
+        <form method="POST" action="#">
+          <div class="mb-3">
+            <label class="form-label">Your name</label>
+            <input class="form-control" name="contact_name" placeholder="Jane Doe">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="contact_email" placeholder="jane@example.com">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea class="form-control" name="message" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-naija w-100">Send message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
