@@ -1,20 +1,46 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, session
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+import re
+from models import db, User, Recipe, Review, Favourite, Contact
+from werkzeug.security import generate_password_hash, check_password_hash
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = "naijacipe-secret-key-change-in-production"
+
+# Database Configuration - SQLite (no server needed)
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///naija_cipe.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = os.getenv('SECRET_KEY', "naijacipe-secret-key-change-in-production")
+
+# Initialize database
+db.init_app(app)
+
+# Create tables on app startup
+with app.app_context():
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"Note: Could not create tables automatically. Run 'python init_db.py' to set up the database: {e}")
 
 
 # ─── Context processors ─────────────────────────────────────
 @app.context_processor
 def inject_globals():
     """Inject variables available in every template."""
+    current_user = None
+    if session.get("logged_in") and session.get("user_id"):
+        current_user = User.query.get(session.get("user_id"))
+    
     return {
         "current_year": datetime.now().year,
         "app_name": "NaijaCipe",
         "is_logged_in": session.get("logged_in", False),
-        "is_admin": session.get("is_admin", False),
-        "current_user": session.get("username", None),
+        "current_user": current_user,
     }
 
 
@@ -156,42 +182,112 @@ def stores():
 @app.route("/about")
 def about():
     team = [
-        {"name": "Daniel Akpoguma", "initial": "D", "role": "Backend · Flask routes & DB",        "avatar_bg": None},
-        {"name": "Teammate 2",      "initial": "T2","role": "Frontend · Bootstrap & UX",          "avatar_bg": "gold"},
-        {"name": "Teammate 3",      "initial": "T3","role": "Testing · PM & Documentation",       "avatar_bg": "red"},
+        {"name": "Ufuoma Akpoguma", "initial": "D",        "avatar_bg": None},
+        {"name": "Damilola Oni",      "initial": "OD", "avatar_bg": "gold"},
+        {"name": "Peter Orji",      "initial": "PO", "avatar_bg": "red"},
     ]
     return render_template("screens/about.html", team=team)
 
 
 # ─── Auth routes ─────────────────────────────────────────────
+def validate_email(email):
+    """Validate email format."""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def validate_password(password):
+    """Validate password strength."""
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    if not any(char.isupper() for char in password):
+        return False, "Password must contain at least one uppercase letter"
+    if not any(char.isdigit() for char in password):
+        return False, "Password must contain at least one number"
+    return True, "Password is valid"
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        # Placeholder — connect to DB in production
-        flash("Account created! Please log in.", "success")
-        return redirect(url_for("login"))
+        username = request.form.get("username", "").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        full_name = request.form.get("full_name", "").strip()
+        
+        # Validation
+        if not username or len(username) < 3:
+            flash("Username must be at least 3 characters long.", "danger")
+            return render_template("screens/register.html")
+        
+        if not validate_email(email):
+            flash("Please enter a valid email address.", "danger")
+            return render_template("screens/register.html")
+        
+        if password != confirm_password:
+            flash("Passwords do not match.", "danger")
+            return render_template("screens/register.html")
+        
+        is_valid, message = validate_password(password)
+        if not is_valid:
+            flash(message, "danger")
+            return render_template("screens/register.html")
+        
+        # Check if user already exists
+        if User.query.filter_by(username=username).first():
+            flash("Username already exists. Please choose another.", "danger")
+            return render_template("screens/register.html")
+        
+        if User.query.filter_by(email=email).first():
+            flash("Email already registered. Please use a different email.", "danger")
+            return render_template("screens/register.html")
+        
+        # Create new user
+        try:
+            user = User(
+                username=username,
+                email=email,
+                full_name=full_name or username
+            )
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            
+            flash("Account created successfully! Please log in.", "success")
+            return redirect(url_for("login"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"An error occurred during registration: {str(e)}", "danger")
+            return render_template("screens/register.html")
+    
     return render_template("screens/register.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username", "")
+        username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        if username == "admin" and password == "admin1234":
+        
+        if not username or not password:
+            flash("Please provide both username and password.", "danger")
+            return render_template("screens/login.html")
+        
+        # Query user from database
+        user = User.query.filter_by(username=username).first()
+        
+        if user and user.check_password(password):
             session["logged_in"] = True
-            session["is_admin"]  = True
-            session["username"]  = "admin"
-            flash("Logged in as Admin.", "success")
-            return redirect(url_for("admin_panel"))
-        elif username == "demo_user" and password == "demo1234":
-            session["logged_in"] = True
-            session["is_admin"]  = False
-            session["username"]  = "adaeze_cooks"
-            flash("Welcome back, Adaeze!", "success")
-            return redirect(url_for("dashboard"))
+            session["user_id"] = user.id
+            session["username"] = user.username
+            session["is_admin"] = (user.username == "admin")
+            
+            flash(f"Welcome back, {user.full_name}!", "success")
+            
+            # Redirect all users to home page
+            return redirect(url_for("landing"))
         else:
-            flash("Invalid credentials. Try demo_user / demo1234.", "danger")
+            flash("Invalid username or password. Please try again.", "danger")
+    
     return render_template("screens/login.html")
 
 
