@@ -1,41 +1,104 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, session
+from flask_wtf.csrf import CSRFProtect
 from datetime import datetime
 from dotenv import load_dotenv
 import os
 import re
-from models import db, User, Recipe, Review, Favourite, Contact
-from werkzeug.security import generate_password_hash, check_password_hash
+import types
+from models import db, User, Recipe, RecipeIngredient, Review, Favourite
+from forms import LoginForm, RegisterForm, ReviewForm, ProfileForm, PasswordForm, RecipeForm, CategoryForm
+from config import config_map
 
-# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
+csrf = CSRFProtect(app)
 
-# Database Configuration - SQLite (no server needed)
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///naija_cipe.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = os.getenv('SECRET_KEY', "naijacipe-secret-key-change-in-production")
+flask_env = os.getenv('FLASK_ENV', 'default')
+app.config.from_object(config_map.get(flask_env, config_map['default']))
 
-# Initialize database
 db.init_app(app)
 
-# Create tables on app startup
 with app.app_context():
     try:
         db.create_all()
+        # Add columns introduced after initial schema — safe to run repeatedly
+        from sqlalchemy import inspect, text
+        inspector = inspect(db.engine)
+        if 'recipes' in inspector.get_table_names():
+            existing = {c['name'] for c in inspector.get_columns('recipes')}
+            new_cols = [
+                ('img_class',    "VARCHAR(50)  DEFAULT 'img-egusi'"),
+                ('youtube_url',  'VARCHAR(500)'),
+                ('instructions', 'TEXT'),
+                ('status',       "VARCHAR(20)  DEFAULT 'published'"),
+            ]
+            for col, defn in new_cols:
+                if col not in existing:
+                    db.session.execute(text(f'ALTER TABLE recipes ADD COLUMN {col} {defn}'))
+            db.session.commit()
     except Exception as e:
-        print(f"Note: Could not create tables automatically. Run 'python init_db.py' to set up the database: {e}")
+        print(f"Note: Could not set up database: {e}")
+
+
+# ─── Helpers ────────────────────────────────────────────────
+
+CATEGORIES = [
+    "Soups & Stews", "Rice Dishes", "Swallow",
+    "Snacks", "Drinks", "Breakfast", "Grills & BBQ",
+]
+
+CATEGORY_LIST = [{"name": c} for c in CATEGORIES]
+
+
+def recipe_to_card(r):
+    """Convert a Recipe model to the dict expected by the recipe_card macro."""
+    return {
+        "slug": r.slug,
+        "title": r.title,
+        "category": r.category or "",
+        "time": (r.prep_time or 0) + (r.cook_time or 0),
+        "rating": round(r.rating or 0, 1),
+        "reviews": r.review_count or 0,
+        "difficulty": r.difficulty or "Easy",
+        "img_class": r.img_class or "img-egusi",
+        "cover_image": r.cover_image or "",
+        "label": r.title,
+    }
+
+
+def parse_ingredient(line):
+    """Parse 'qty [unit] name' into (qty, name) tuple."""
+    units = {
+        'cup', 'cups', 'g', 'kg', 'ml', 'l', 'tbsp', 'tsp', 'oz', 'lb',
+        'bunch', 'pc', 'pcs', 'handful', 'pinch', 'slice', 'slices',
+        'clove', 'cloves', 'can', 'cans', 'medium', 'large', 'small',
+    }
+    parts = line.strip().split()
+    if not parts:
+        return "", ""
+    if parts[0][0].isdigit() or parts[0][0] in ('½', '¼', '¾'):
+        if len(parts) >= 3 and parts[1].lower().rstrip('s') in units:
+            return f"{parts[0]} {parts[1]}", ' '.join(parts[2:])
+        if len(parts) >= 2 and parts[1].lower() in units:
+            return f"{parts[0]} {parts[1]}", ' '.join(parts[2:]) if len(parts) > 2 else ""
+        return parts[0], ' '.join(parts[1:])
+    return "", line.strip()
+
+
+def update_recipe_rating(recipe):
+    """Recalculate and save a recipe's rating and review_count."""
+    reviews = Review.query.filter_by(recipe_id=recipe.id).all()
+    recipe.review_count = len(reviews)
+    recipe.rating = (sum(r.rating for r in reviews) / len(reviews)) if reviews else 0.0
 
 
 # ─── Context processors ─────────────────────────────────────
 @app.context_processor
 def inject_globals():
-    """Inject variables available in every template."""
     current_user = None
     if session.get("logged_in") and session.get("user_id"):
         current_user = User.query.get(session.get("user_id"))
-    
     return {
         "current_year": datetime.now().year,
         "app_name": "NaijaCipe",
@@ -47,99 +110,157 @@ def inject_globals():
 # ─── Public routes ───────────────────────────────────────────
 @app.route("/")
 def landing():
-    featured_recipes = [
-        {"slug": "jollof-rice",  "title": "Classic Nigerian Jollof Rice", "category": "Rice Dishes",  "time": 45, "rating": 4.9, "difficulty": "Medium", "img_class": "img-jollof",  "label": "Jollof Rice"},
-        {"slug": "egusi-soup",   "title": "Egusi Soup with Pounded Yam",  "category": "Soups & Stews","time": 60, "rating": 4.7, "difficulty": "Medium", "img_class": "img-egusi",   "label": "Egusi Soup"},
-        {"slug": "suya",         "title": "Spicy Beef Suya Skewers",      "category": "Grills & BBQ", "time": 30, "rating": 4.9, "difficulty": "Easy",   "img_class": "img-suya",    "label": "Suya"},
-        {"slug": "chinchin",     "title": "Crunchy Nigerian Chin Chin",   "category": "Snacks",       "time": 50, "rating": 4.3, "difficulty": "Easy",   "img_class": "img-chinchin","label": "Chin Chin"},
-    ]
+    featured = Recipe.query.filter_by(status='published').order_by(
+        Recipe.review_count.desc()
+    ).limit(4).all()
+    featured_recipes = [recipe_to_card(r) for r in featured]
+
     categories = [
-        {"icon": "bi-cup-hot",    "name": "Soups & Stews",  "count": 42},
-        {"icon": "bi-egg-fried",  "name": "Rice Dishes",    "count": 28},
-        {"icon": "bi-basket3",    "name": "Swallow",        "count": 15},
-        {"icon": "bi-cookie",     "name": "Snacks",         "count": 36},
-        {"icon": "bi-cup-straw",  "name": "Drinks",         "count": 18},
-        {"icon": "bi-sunrise",    "name": "Breakfast",      "count": 24},
+        {"icon": "bi-cup-hot",    "name": "Soups & Stews",  "count": Recipe.query.filter_by(category="Soups & Stews").count()},
+        {"icon": "bi-egg-fried",  "name": "Rice Dishes",    "count": Recipe.query.filter_by(category="Rice Dishes").count()},
+        {"icon": "bi-basket3",    "name": "Swallow",        "count": Recipe.query.filter_by(category="Swallow").count()},
+        {"icon": "bi-cookie",     "name": "Snacks",         "count": Recipe.query.filter_by(category="Snacks").count()},
+        {"icon": "bi-cup-straw",  "name": "Drinks",         "count": Recipe.query.filter_by(category="Drinks").count()},
+        {"icon": "bi-sunrise",    "name": "Breakfast",      "count": Recipe.query.filter_by(category="Breakfast").count()},
     ]
     return render_template("screens/landing.html", featured_recipes=featured_recipes, categories=categories)
 
 
 @app.route("/recipes")
 def browse():
-    recipes = [
-        {"slug": "jollof-rice",    "title": "Classic Jollof Rice",      "category": "Rice Dishes", "time": 45, "rating": 4.9, "reviews": 128, "difficulty": "Medium", "img_class": "img-jollof",      "label": "Jollof Rice"},
-        {"slug": "egusi-soup",     "title": "Egusi Soup",               "category": "Soups",       "time": 60, "rating": 4.7, "reviews": 94,  "difficulty": "Medium", "img_class": "img-egusi",       "label": "Egusi Soup"},
-        {"slug": "suya",           "title": "Spicy Beef Suya",          "category": "Grills",      "time": 30, "rating": 4.9, "reviews": 210, "difficulty": "Easy",   "img_class": "img-suya",        "label": "Suya"},
-        {"slug": "pepper-soup",    "title": "Catfish Pepper Soup",      "category": "Soups",       "time": 40, "rating": 4.6, "reviews": 72,  "difficulty": "Easy",   "img_class": "img-pepper",      "label": "Pepper Soup"},
-        {"slug": "chinchin",       "title": "Crunchy Chin Chin",        "category": "Snacks",      "time": 50, "rating": 4.3, "reviews": 56,  "difficulty": "Easy",   "img_class": "img-chinchin",    "label": "Chin Chin"},
-        {"slug": "puff-puff",      "title": "Fluffy Puff Puff",         "category": "Snacks",      "time": 35, "rating": 4.8, "reviews": 183, "difficulty": "Easy",   "img_class": "img-puffpuff",    "label": "Puff Puff"},
-        {"slug": "moi-moi",        "title": "Steamed Moi Moi",          "category": "Breakfast",   "time": 75, "rating": 4.5, "reviews": 64,  "difficulty": "Medium", "img_class": "img-moimoi",      "label": "Moi Moi"},
-        {"slug": "efo-riro",       "title": "Efo Riro",                 "category": "Soups",       "time": 50, "rating": 4.7, "reviews": 89,  "difficulty": "Medium", "img_class": "img-efo",         "label": "Efo Riro"},
-        {"slug": "akara",          "title": "Akara (Bean Cakes)",       "category": "Breakfast",   "time": 30, "rating": 4.6, "reviews": 71,  "difficulty": "Easy",   "img_class": "img-akara",       "label": "Akara"},
-        {"slug": "zobo",           "title": "Zobo Hibiscus Drink",      "category": "Drinks",      "time": 25, "rating": 4.4, "reviews": 48,  "difficulty": "Easy",   "img_class": "img-zobo",        "label": "Zobo Drink"},
-        {"slug": "banana-bread",   "title": "Banana Nut Bread",         "category": "Snacks",      "time": 70, "rating": 4.2, "reviews": 38,  "difficulty": "Easy",   "img_class": "img-bananabread", "label": "Banana Bread"},
-        {"slug": "okra-soup",      "title": "Okra Soup (Draw Soup)",    "category": "Soups",       "time": 45, "rating": 4.5, "reviews": 55,  "difficulty": "Easy",   "img_class": "img-okra",        "label": "Okra Soup"},
-    ]
-    categories = [
-        {"name": "Soups & Stews"}, {"name": "Rice Dishes"}, {"name": "Swallow"},
-        {"name": "Snacks"}, {"name": "Drinks"}, {"name": "Breakfast"}, {"name": "Grills"},
-    ]
-    pagination = {"page": 1, "per_page": 12, "pages": 1, "has_prev": False, "has_next": False,
-                  "prev_num": None, "next_num": None}
     sort_by = request.args.get("sort", "popular")
-    category = request.args.get("category", "all")
-    return render_template("screens/browse.html", recipes=recipes, categories=categories,
-                           pagination=pagination, sort_by=sort_by, category=category, total=len(recipes))
+    selected_cats = request.args.getlist("cat")
+    selected_diffs = request.args.getlist("diff")
+    max_time = request.args.get("time", type=int)
+    search_q = request.args.get("q", "").strip()
+    page = request.args.get("page", 1, type=int)
+    per_page = 12
+
+    q = Recipe.query.filter_by(status='published')
+
+    if selected_cats:
+        q = q.filter(Recipe.category.in_(selected_cats))
+    if selected_diffs:
+        q = q.filter(Recipe.difficulty.in_(selected_diffs))
+    if search_q:
+        q = q.filter(Recipe.title.ilike(f"%{search_q}%"))
+    if max_time:
+        q = q.filter((Recipe.prep_time + Recipe.cook_time) <= max_time)
+
+    if sort_by == "newest":
+        q = q.order_by(Recipe.created_at.desc())
+    elif sort_by in ("rated", "highest-rated"):
+        q = q.order_by(Recipe.rating.desc())
+    elif sort_by == "quickest":
+        q = q.order_by((Recipe.prep_time + Recipe.cook_time).asc())
+    else:
+        q = q.order_by(Recipe.review_count.desc())
+
+    paged = q.paginate(page=page, per_page=per_page, error_out=False)
+    recipes = [recipe_to_card(r) for r in paged.items]
+
+    return render_template(
+        "screens/browse.html",
+        recipes=recipes,
+        categories=CATEGORY_LIST,
+        pagination=paged,
+        sort_by=sort_by,
+        category=selected_cats[0] if selected_cats else "all",
+        total=paged.total,
+    )
 
 
 @app.route("/recipes/<slug>")
 def recipe_detail(slug):
-    recipe = {
-        "slug": slug,
-        "title": "Egusi Soup with Pounded Yam",
-        "category": "Soups & Stews",
-        "img_class": "img-egusi",
-        "rating": 4.7,
-        "review_count": 94,
-        "time": 60,
-        "prep_time": 15,
-        "cook_time": 45,
-        "servings": 6,
-        "difficulty": "Medium",
-        "posted_by": "Admin",
-        "description": "A rich, velvety soup made from ground melon seeds, leafy greens, assorted meats and fish. Served with pounded yam, it's the centrepiece of countless Nigerian Sunday tables.",
-        "ingredients": [
-            {"qty": "2 cups",  "name": "Egusi (melon) seeds, ground"},
-            {"qty": "500 g",   "name": "Assorted meat (beef, tripe, shaki)"},
-            {"qty": "300 g",   "name": "Dried fish or stockfish, soaked"},
-            {"qty": "1 cup",   "name": "Palm oil"},
-            {"qty": "4 pcs",   "name": "Scotch bonnet peppers, blended"},
-            {"qty": "1 bunch", "name": "Ugu (pumpkin) or spinach leaves"},
-            {"qty": "2 tbsp",  "name": "Ground crayfish"},
-            {"qty": "2 cubes", "name": "Seasoning (Maggi / Knorr)"},
-            {"qty": "1 tsp",   "name": "Salt, to taste"},
-            {"qty": "2 tbsp",  "name": "Locust beans (Iru) — optional"},
-        ],
-        "instructions": [
-            {"step": 1, "title": "Cook the meats",        "body": "Season assorted meats with onion, salt and a seasoning cube. Boil for 20 minutes until tender. Reserve the stock."},
-            {"step": 2, "title": "Prepare the egusi paste","body": "Mix ground egusi with a little water to form a thick paste."},
-            {"step": 3, "title": "Fry the base",          "body": "Heat palm oil, add sliced onions, then the egusi paste in lumps. Fry for 10 minutes, stirring occasionally."},
-            {"step": 4, "title": "Build the soup",        "body": "Add blended pepper, reserved stock, locust beans and crayfish. Simmer for 15 minutes."},
-            {"step": 5, "title": "Finish",                "body": "Stir in cooked meats, dried fish, and finally the ugu leaves. Simmer for 5 more minutes. Taste and adjust seasoning."},
-            {"step": 6, "title": "Serve hot",             "body": "Serve with pounded yam, eba or fufu."},
-        ],
-        "reviews": [
-            {"author": "Adaeze O.", "initial": "A", "avatar_bg": None,      "rating": 5, "date": "2 days ago",  "body": "Reminded me of my grandmother's kitchen. Tip: let the egusi fry a little longer than you think — that's where the flavour comes from."},
-            {"author": "Tunde B.",  "initial": "T", "avatar_bg": "gold",    "rating": 4, "date": "1 week ago", "body": "Great recipe. I used spinach instead of ugu since I couldn't find it — still delicious."},
-            {"author": "Chinwe M.", "initial": "C", "avatar_bg": "red",     "rating": 4, "date": "2 weeks ago","body": "Perfect for my son's birthday — the whole family approved!"},
-        ],
-        "related": [
-            {"slug": "efo-riro",    "title": "Efo Riro",    "img_class": "img-efo",   "rating": 4.7, "time": 50},
-            {"slug": "okra-soup",   "title": "Okra Soup",   "img_class": "img-okra",  "rating": 4.5, "time": 45},
-            {"slug": "pepper-soup", "title": "Pepper Soup", "img_class": "img-pepper","rating": 4.6, "time": 40},
-        ],
-    }
-    return render_template("screens/detail.html", recipe=recipe)
+    db_recipe = Recipe.query.filter_by(slug=slug).first_or_404()
+    review_form = ReviewForm()
+
+    ingredient_list = [
+        {"qty": ing.quantity or "", "name": ing.ingredient_name or ""}
+        for ing in db_recipe.ingredients
+    ]
+
+    steps = [l.strip() for l in (db_recipe.instructions or "").splitlines() if l.strip()]
+    instruction_list = [
+        {"step_num": i + 1, "title": f"Step {i + 1}", "body": step}
+        for i, step in enumerate(steps)
+    ]
+
+    review_list = [
+        {
+            "status": "approved",
+            "rating": rv.rating,
+            "body": rv.body,
+            "created_at": rv.created_at,
+            "user": {
+                "full_name": rv.author.full_name or rv.author.username,
+                "initial": (rv.author.full_name or rv.author.username)[0].upper(),
+                "avatar_bg": None,
+            },
+        }
+        for rv in db_recipe.reviews
+    ]
+
+    related_db = Recipe.query.filter(
+        Recipe.category == db_recipe.category,
+        Recipe.id != db_recipe.id,
+        Recipe.status == 'published',
+    ).limit(3).all()
+    related = [
+        {
+            "slug": r.slug,
+            "title": r.title,
+            "img_class": r.img_class or "img-egusi",
+            "avg_rating": round(r.rating or 0, 1),
+            "total_time": (r.prep_time or 0) + (r.cook_time or 0),
+        }
+        for r in related_db
+    ]
+
+    poster_name = "Admin"
+    if db_recipe.poster:
+        poster_name = db_recipe.poster.full_name or db_recipe.poster.username
+
+    recipe = types.SimpleNamespace(
+        id=db_recipe.id,
+        slug=db_recipe.slug,
+        title=db_recipe.title,
+        category=types.SimpleNamespace(name=db_recipe.category or ""),
+        img_class=db_recipe.img_class or "img-egusi",
+        avg_rating=round(db_recipe.rating or 0, 1),
+        review_count=db_recipe.review_count or 0,
+        total_time=(db_recipe.prep_time or 0) + (db_recipe.cook_time or 0),
+        prep_time=db_recipe.prep_time or 0,
+        cook_time=db_recipe.cook_time or 0,
+        servings=db_recipe.servings or 0,
+        difficulty=db_recipe.difficulty or "",
+        description=db_recipe.description or "",
+        posted_by=poster_name,
+        youtube_url=db_recipe.youtube_url,
+        ingredient_list=ingredient_list,
+        instruction_list=instruction_list,
+        review_list=review_list,
+    )
+
+    user_has_favourited = False
+    user_has_reviewed = False
+    if session.get("logged_in"):
+        uid = session["user_id"]
+        user_has_favourited = Favourite.query.filter_by(
+            user_id=uid, recipe_id=db_recipe.id
+        ).first() is not None
+        user_has_reviewed = Review.query.filter_by(
+            user_id=uid, recipe_id=db_recipe.id
+        ).first() is not None
+
+    return render_template(
+        "screens/detail.html",
+        recipe=recipe,
+        user_has_favourited=user_has_favourited,
+        user_has_reviewed=user_has_reviewed,
+        review_form=review_form,
+        related=related,
+    )
 
 
 @app.route("/stores")
@@ -182,113 +303,97 @@ def stores():
 @app.route("/about")
 def about():
     team = [
-        {"name": "Ufuoma Akpoguma", "initial": "D",        "avatar_bg": None},
-        {"name": "Damilola Oni",      "initial": "OD", "avatar_bg": "gold"},
-        {"name": "Peter Orji",      "initial": "PO", "avatar_bg": "red"},
+        {"name": "Ufuoma Akpoguma", "initial": "D",  "avatar_bg": None},
+        {"name": "Damilola Oni",     "initial": "OD", "avatar_bg": "gold"},
+        {"name": "Peter Orji",       "initial": "PO", "avatar_bg": "red"},
     ]
     return render_template("screens/about.html", team=team)
 
 
 # ─── Auth routes ─────────────────────────────────────────────
 def validate_email(email):
-    """Validate email format."""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(pattern, email) is not None
 
+
 def validate_password(password):
-    """Validate password strength."""
     if len(password) < 8:
         return False, "Password must be at least 8 characters long"
-    if not any(char.isupper() for char in password):
+    if not any(c.isupper() for c in password):
         return False, "Password must contain at least one uppercase letter"
-    if not any(char.isdigit() for char in password):
+    if not any(c.isdigit() for c in password):
         return False, "Password must contain at least one number"
     return True, "Password is valid"
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    form = RegisterForm()
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
         confirm_password = request.form.get("confirm_password", "")
         full_name = request.form.get("full_name", "").strip()
-        
-        # Validation
+
         if not username or len(username) < 3:
             flash("Username must be at least 3 characters long.", "danger")
-            return render_template("screens/register.html")
-        
+            return render_template("screens/register.html", form=form)
         if not validate_email(email):
             flash("Please enter a valid email address.", "danger")
-            return render_template("screens/register.html")
-        
+            return render_template("screens/register.html", form=form)
         if password != confirm_password:
             flash("Passwords do not match.", "danger")
-            return render_template("screens/register.html")
-        
+            return render_template("screens/register.html", form=form)
         is_valid, message = validate_password(password)
         if not is_valid:
             flash(message, "danger")
-            return render_template("screens/register.html")
-        
-        # Check if user already exists
+            return render_template("screens/register.html", form=form)
         if User.query.filter_by(username=username).first():
             flash("Username already exists. Please choose another.", "danger")
-            return render_template("screens/register.html")
-        
+            return render_template("screens/register.html", form=form)
         if User.query.filter_by(email=email).first():
             flash("Email already registered. Please use a different email.", "danger")
-            return render_template("screens/register.html")
-        
-        # Create new user
+            return render_template("screens/register.html", form=form)
+
         try:
-            user = User(
-                username=username,
-                email=email,
-                full_name=full_name or username
-            )
+            user = User(username=username, email=email, full_name=full_name or username)
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
-            
             flash("Account created successfully! Please log in.", "success")
             return redirect(url_for("login"))
         except Exception as e:
             db.session.rollback()
             flash(f"An error occurred during registration: {str(e)}", "danger")
-            return render_template("screens/register.html")
-    
-    return render_template("screens/register.html")
+            return render_template("screens/register.html", form=form)
+
+    return render_template("screens/register.html", form=form)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    form = LoginForm()
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        
+
         if not username or not password:
             flash("Please provide both username and password.", "danger")
-            return render_template("screens/login.html")
-        
-        # Query user from database
+            return render_template("screens/login.html", form=form)
+
         user = User.query.filter_by(username=username).first()
-        
         if user and user.check_password(password):
             session["logged_in"] = True
             session["user_id"] = user.id
             session["username"] = user.username
             session["is_admin"] = (user.username == "admin")
-            
-            flash(f"Welcome back, {user.full_name}!", "success")
-            
-            # Redirect all users to home page
+            flash(f"Welcome back, {user.full_name or user.username}!", "success")
             return redirect(url_for("landing"))
         else:
             flash("Invalid username or password. Please try again.", "danger")
-    
-    return render_template("screens/login.html")
+
+    return render_template("screens/login.html", form=form)
 
 
 @app.route("/logout")
@@ -303,7 +408,8 @@ def login_required(f):
     from functools import wraps
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not session.get("logged_in"):
+        if not session.get("logged_in") or not session.get("user_id"):
+            session.clear()
             flash("Please log in to view that page.", "warning")
             return redirect(url_for("login"))
         return f(*args, **kwargs)
@@ -313,46 +419,154 @@ def login_required(f):
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    username = session.get("username", "user")
+    uid = session["user_id"]
+    db_user = User.query.get(uid)
+
+    fav_count = Favourite.query.filter_by(user_id=uid).count()
+    review_count = Review.query.filter_by(user_id=uid).count()
+
     user = {
-        "initial": username[0].upper(),
-        "full_name": "Adaeze Cooks" if username == "adaeze_cooks" else username.title(),
-        "created_at": datetime(2024, 1, 15),
+        "initial": (db_user.full_name or db_user.username)[0].upper(),
+        "full_name": db_user.full_name or db_user.username,
+        "created_at": db_user.created_at,
+        "avatar_url": db_user.avatar_url,
     }
-    stats = {"favourites": 14, "reviews": 8, "recipes_tried": 22, "streak": 3}
-    activity = [
-        {"icon": "bi-heart-fill",     "icon_bg": "#FFE0E0", "icon_color": "var(--naija-red)",      "text": "You favourited <strong>Classic Jollof Rice</strong>",       "date": "3 days ago",  "action_url": url_for("recipe_detail", slug="jollof-rice"), "action_label": "View"},
-        {"icon": "bi-chat-dots-fill", "icon_bg": "#E0F4EC", "icon_color": "var(--naija-green)",    "text": "You reviewed <strong>Egusi Soup</strong> — gave it 5 stars", "date": "5 days ago",  "action_url": url_for("my_reviews"), "action_label": "See"},
-        {"icon": "bi-heart-fill",     "icon_bg": "#FFF3D1", "icon_color": "var(--naija-gold-dark)","text": "You favourited <strong>Spicy Beef Suya</strong>",            "date": "1 week ago",  "action_url": url_for("recipe_detail", slug="suya"),        "action_label": "View"},
-        {"icon": "bi-chat-dots-fill", "icon_bg": "#E8E4FF", "icon_color": "#6B4FCF",              "text": "You reviewed <strong>Puff Puff</strong> — gave it 4 stars",  "date": "2 weeks ago", "action_url": url_for("my_reviews"), "action_label": "See"},
-    ]
+    stats = {
+        "favourites": fav_count,
+        "reviews": review_count,
+        "recipes_tried": fav_count,
+        "streak": 0,
+    }
+
+    activity = []
+    recent_favs = (
+        Favourite.query.filter_by(user_id=uid)
+        .order_by(Favourite.created_at.desc()).limit(2).all()
+    )
+    for fav in recent_favs:
+        if fav.recipe:
+            activity.append({
+                "icon": "bi-heart-fill",
+                "icon_bg": "#FFE0E0",
+                "icon_color": "var(--naija-red)",
+                "text": f"You favourited <strong>{fav.recipe.title}</strong>",
+                "date": fav.created_at.strftime("%-d %b %Y"),
+                "action_url": url_for("recipe_detail", slug=fav.recipe.slug),
+                "action_label": "View",
+            })
+    recent_reviews = (
+        Review.query.filter_by(user_id=uid)
+        .order_by(Review.created_at.desc()).limit(2).all()
+    )
+    for rv in recent_reviews:
+        if rv.recipe:
+            activity.append({
+                "icon": "bi-chat-dots-fill",
+                "icon_bg": "#E0F4EC",
+                "icon_color": "var(--naija-green)",
+                "text": f"You reviewed <strong>{rv.recipe.title}</strong> — gave it {rv.rating} stars",
+                "date": rv.created_at.strftime("%-d %b %Y"),
+                "action_url": url_for("my_reviews"),
+                "action_label": "See",
+            })
+
     return render_template("screens/dashboard.html", user=user, stats=stats, activity=activity)
 
 
 @app.route("/favourites")
 @login_required
 def favourites():
-    fav_recipes = [
-        {"slug": "jollof-rice", "title": "Classic Jollof Rice",  "category": "Rice Dishes","time": 45, "rating": 4.9, "difficulty": "Medium","img_class": "img-jollof",   "label": "Jollof Rice"},
-        {"slug": "egusi-soup",  "title": "Egusi Soup",           "category": "Soups",      "time": 60, "rating": 4.7, "difficulty": "Medium","img_class": "img-egusi",    "label": "Egusi Soup"},
-        {"slug": "suya",        "title": "Spicy Beef Suya",      "category": "Grills",     "time": 30, "rating": 4.9, "difficulty": "Easy",  "img_class": "img-suya",     "label": "Suya"},
-        {"slug": "puff-puff",   "title": "Fluffy Puff Puff",     "category": "Snacks",     "time": 35, "rating": 4.8, "difficulty": "Easy",  "img_class": "img-puffpuff", "label": "Puff Puff"},
-        {"slug": "moi-moi",     "title": "Steamed Moi Moi",      "category": "Breakfast",  "time": 75, "rating": 4.5, "difficulty": "Medium","img_class": "img-moimoi",   "label": "Moi Moi"},
-        {"slug": "akara",       "title": "Akara (Bean Cakes)",   "category": "Breakfast",  "time": 30, "rating": 4.6, "difficulty": "Easy",  "img_class": "img-akara",    "label": "Akara"},
-        {"slug": "zobo",        "title": "Zobo Hibiscus Drink",  "category": "Drinks",     "time": 25, "rating": 4.4, "difficulty": "Easy",  "img_class": "img-zobo",     "label": "Zobo Drink"},
-        {"slug": "chinchin",    "title": "Crunchy Chin Chin",    "category": "Snacks",     "time": 50, "rating": 4.3, "difficulty": "Easy",  "img_class": "img-chinchin", "label": "Chin Chin"},
-    ]
+    favs = (
+        Favourite.query.filter_by(user_id=session["user_id"])
+        .order_by(Favourite.created_at.desc()).all()
+    )
+    fav_recipes = [recipe_to_card(f.recipe) for f in favs if f.recipe]
     return render_template("screens/favourites.html", recipes=fav_recipes)
+
+
+@app.route("/favourites/toggle/<slug>", methods=["POST"])
+@login_required
+def toggle_favourite(slug):
+    recipe = Recipe.query.filter_by(slug=slug).first_or_404()
+    uid = session["user_id"]
+    fav = Favourite.query.filter_by(user_id=uid, recipe_id=recipe.id).first()
+    if fav:
+        db.session.delete(fav)
+        flash("Removed from favourites.", "info")
+    else:
+        db.session.add(Favourite(user_id=uid, recipe_id=recipe.id))
+        flash("Saved to favourites!", "success")
+    db.session.commit()
+    return redirect(url_for("recipe_detail", slug=slug))
+
+
+@app.route("/reviews/<int:review_id>/delete", methods=["POST"])
+@login_required
+def delete_user_review(review_id):
+    review = Review.query.get_or_404(review_id)
+    if review.user_id != session["user_id"]:
+        flash("You can only delete your own reviews.", "danger")
+        return redirect(url_for("my_reviews"))
+    recipe = review.recipe
+    db.session.delete(review)
+    db.session.flush()
+    update_recipe_rating(recipe)
+    db.session.commit()
+    flash("Review deleted.", "success")
+    return redirect(url_for("my_reviews"))
+
+
+@app.route("/recipes/<slug>/review", methods=["POST"])
+@login_required
+def post_review(slug):
+    form = ReviewForm()
+    recipe = Recipe.query.filter_by(slug=slug).first_or_404()
+    if form.validate_on_submit():
+        existing = Review.query.filter_by(
+            user_id=session["user_id"], recipe_id=recipe.id
+        ).first()
+        if existing:
+            flash("You have already reviewed this recipe.", "warning")
+        else:
+            review = Review(
+                user_id=session["user_id"],
+                recipe_id=recipe.id,
+                rating=int(form.rating.data),
+                body=form.body.data,
+            )
+            db.session.add(review)
+            db.session.flush()
+            update_recipe_rating(recipe)
+            db.session.commit()
+            flash("Your review has been submitted!", "success")
+    else:
+        flash("Please select a star rating and write a review.", "danger")
+    return redirect(url_for("recipe_detail", slug=slug))
 
 
 @app.route("/my-reviews")
 @login_required
 def my_reviews():
+    db_reviews = (
+        Review.query.filter_by(user_id=session["user_id"])
+        .order_by(Review.created_at.desc()).all()
+    )
     reviews = [
-        {"recipe_title": "Egusi Soup",       "recipe_category": "Soups & Stews","img_class": "img-egusi",   "slug": "egusi-soup",  "rating": 5, "date": "5 days ago",   "body": "Reminded me of my grandmother's kitchen. Tip: let the egusi fry a little longer than you think — that's where the flavour comes from."},
-        {"recipe_title": "Fluffy Puff Puff", "recipe_category": "Snacks",       "img_class": "img-puffpuff","slug": "puff-puff",   "rating": 4, "date": "2 weeks ago",  "body": "Worked on my second attempt. First batch came out dense — the key is letting the dough rise for a full hour."},
-        {"recipe_title": "Classic Jollof Rice","recipe_category": "Rice Dishes", "img_class": "img-jollof",  "slug": "jollof-rice", "rating": 5, "date": "3 weeks ago",  "body": "Party Jollof at its finest. I added a bit of smoked turkey for extra depth and the family fought over the last bits of rice at the bottom of the pot."},
-        {"recipe_title": "Spicy Beef Suya",  "recipe_category": "Grills & BBQ", "img_class": "img-suya",    "slug": "suya",        "rating": 4, "date": "1 month ago",  "body": "Yaji spice is the secret — don't skip toasting the groundnuts first. Mine came out closer to mallam-level on my third try."},
+        {
+            "id": rv.id,
+            "rating": rv.rating,
+            "body": rv.body,
+            "created_at": rv.created_at,
+            "recipe": {
+                "slug": rv.recipe.slug,
+                "img_class": rv.recipe.img_class or "img-egusi",
+                "cover_image": rv.recipe.cover_image or "",
+                "title": rv.recipe.title,
+                "category": types.SimpleNamespace(name=rv.recipe.category or ""),
+            },
+        }
+        for rv in db_reviews
+        if rv.recipe
     ]
     return render_template("screens/my_reviews.html", reviews=reviews)
 
@@ -360,7 +574,112 @@ def my_reviews():
 @app.route("/settings")
 @login_required
 def user_settings():
-    return render_template("screens/user_settings.html")
+    db_user = User.query.get(session["user_id"])
+    full_name = db_user.full_name or db_user.username
+    user = types.SimpleNamespace(
+        initial=full_name[0].upper(),
+        full_name=full_name,
+        username=db_user.username,
+        email=db_user.email,
+        avatar_url=db_user.avatar_url,
+        location=None,
+        bio=None,
+        notify_comments=False,
+        notify_digest=True,
+        notify_new_recipe=False,
+        notify_updates=False,
+        privacy_show_reviews=True,
+        privacy_show_favourites=False,
+        privacy_leaderboard=False,
+    )
+    profile_form = ProfileForm(data={
+        "full_name": user.full_name,
+        "username": user.username,
+        "email": user.email,
+    })
+    password_form = PasswordForm()
+    return render_template(
+        "screens/user_settings.html",
+        user=user,
+        profile_form=profile_form,
+        password_form=password_form,
+    )
+
+
+@app.route("/settings/profile", methods=["POST"])
+@login_required
+def update_profile():
+    form = ProfileForm()
+    db_user = User.query.get(session["user_id"])
+    if form.validate_on_submit():
+        new_username = form.username.data
+        new_email = form.email.data
+        if new_username != db_user.username and User.query.filter_by(username=new_username).first():
+            flash("Username already taken.", "danger")
+            return redirect(url_for("user_settings"))
+        if new_email != db_user.email and User.query.filter_by(email=new_email).first():
+            flash("Email already registered.", "danger")
+            return redirect(url_for("user_settings"))
+        db_user.full_name = form.full_name.data
+        db_user.username = new_username
+        db_user.email = new_email
+        db.session.commit()
+        session["username"] = db_user.username
+        flash("Profile updated.", "success")
+    else:
+        flash("Please correct the errors in the form.", "danger")
+    return redirect(url_for("user_settings"))
+
+
+@app.route("/settings/password", methods=["POST"])
+@login_required
+def update_password():
+    form = PasswordForm()
+    db_user = User.query.get(session["user_id"])
+    if form.validate_on_submit():
+        if not db_user.check_password(form.current_password.data):
+            flash("Current password is incorrect.", "danger")
+        else:
+            db_user.set_password(form.new_password.data)
+            db.session.commit()
+            flash("Password updated.", "success")
+    else:
+        flash("Please correct the form errors.", "danger")
+    return redirect(url_for("user_settings"))
+
+
+@app.route("/settings/avatar", methods=["POST"])
+@login_required
+def upload_avatar():
+    file = request.files.get("avatar")
+    if not file or file.filename == "":
+        flash("No file selected.", "danger")
+        return redirect(url_for("user_settings"))
+    allowed = {"png", "jpg", "jpeg", "gif", "webp"}
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+    if ext not in allowed:
+        flash("Only PNG, JPG, GIF and WEBP images are allowed.", "danger")
+        return redirect(url_for("user_settings"))
+    uid = session["user_id"]
+    filename = f"{uid}.{ext}"
+    save_path = os.path.join(app.root_path, "static", "uploads", "avatars", filename)
+    file.save(save_path)
+    db_user = User.query.get(uid)
+    db_user.avatar_url = f"uploads/avatars/{filename}"
+    db.session.commit()
+    flash("Profile photo updated.", "success")
+    return redirect(url_for("user_settings"))
+
+
+@app.route("/settings/delete", methods=["POST"])
+@login_required
+def delete_account():
+    db_user = User.query.get(session["user_id"])
+    db.session.delete(db_user)
+    db.session.commit()
+    session.clear()
+    flash("Your account has been deleted.", "info")
+    return redirect(url_for("landing"))
 
 
 # ─── Admin routes ────────────────────────────────────────────
@@ -378,27 +697,202 @@ def admin_required(f):
 @app.route("/admin")
 @admin_required
 def admin_panel():
-    stats = {"recipes": 214, "users": 5241, "reviews": 1893, "pending": 7}
-    return render_template("screens/admin.html", active_view="dashboard", stats=stats)
+    stats = {
+        "recipes": Recipe.query.count(),
+        "users": User.query.count(),
+        "reviews": Review.query.count(),
+        "pending": Recipe.query.filter_by(status='pending').count(),
+    }
+    recent_recipes = Recipe.query.order_by(Recipe.created_at.desc()).limit(5).all()
+    all_recipes = Recipe.query.order_by(Recipe.created_at.desc()).all()
+    all_users = User.query.order_by(User.created_at.desc()).all()
+    all_reviews = Review.query.order_by(Review.created_at.desc()).all()
+    all_categories = [
+        types.SimpleNamespace(
+            name=cat,
+            recipe_count=Recipe.query.filter_by(category=cat).count(),
+        )
+        for cat in CATEGORIES
+    ]
+    category_form = CategoryForm()
+    return render_template(
+        "screens/admin.html",
+        active_view="dashboard",
+        stats=stats,
+        recent_recipes=recent_recipes,
+        all_recipes=all_recipes,
+        all_users=all_users,
+        all_reviews=all_reviews,
+        all_categories=all_categories,
+        category_form=category_form,
+    )
 
 
 @app.route("/admin/add-recipe", methods=["GET", "POST"])
 @admin_required
 def add_recipe():
-    if request.method == "POST":
+    form = RecipeForm()
+    form.category.choices = [(c, c) for c in CATEGORIES]
+
+    if form.validate_on_submit():
+        base_slug = re.sub(r'[^a-z0-9]+', '-', form.title.data.lower()).strip('-')
+        slug = base_slug
+        counter = 1
+        while Recipe.query.filter_by(slug=slug).first():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        recipe = Recipe(
+            title=form.title.data,
+            slug=slug,
+            category=form.category.data,
+            description=form.description.data,
+            prep_time=form.prep_time.data,
+            cook_time=form.cook_time.data,
+            servings=form.servings.data,
+            difficulty=form.difficulty.data,
+            img_class=form.img_class.data,
+            cover_image=form.cover_image.data or None,
+            instructions=form.instructions.data,
+            youtube_url=form.youtube_url.data or None,
+            status=form.status.data,
+            posted_by=session["user_id"],
+        )
+        db.session.add(recipe)
+        db.session.flush()
+
+        for line in form.ingredients.data.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            qty, name = parse_ingredient(line)
+            db.session.add(RecipeIngredient(
+                recipe_id=recipe.id,
+                quantity=qty,
+                ingredient_name=name,
+            ))
+
+        db.session.commit()
         flash("Recipe published successfully!", "success")
         return redirect(url_for("admin_panel"))
-    return render_template("screens/add_recipe.html")
+
+    return render_template("screens/add_recipe.html", form=form, recipe=None)
+
+
+@app.route("/admin/edit-recipe/<int:recipe_id>", methods=["GET", "POST"])
+@admin_required
+def edit_recipe(recipe_id):
+    recipe = Recipe.query.get_or_404(recipe_id)
+    form = RecipeForm()
+    form.category.choices = [(c, c) for c in CATEGORIES]
+
+    if form.validate_on_submit():
+        recipe.title = form.title.data
+        recipe.category = form.category.data
+        recipe.description = form.description.data
+        recipe.prep_time = form.prep_time.data
+        recipe.cook_time = form.cook_time.data
+        recipe.servings = form.servings.data
+        recipe.difficulty = form.difficulty.data
+        recipe.img_class = form.img_class.data
+        recipe.cover_image = form.cover_image.data or None
+        recipe.instructions = form.instructions.data
+        recipe.youtube_url = form.youtube_url.data or None
+        recipe.status = form.status.data
+
+        RecipeIngredient.query.filter_by(recipe_id=recipe.id).delete()
+        for line in form.ingredients.data.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            qty, name = parse_ingredient(line)
+            db.session.add(RecipeIngredient(
+                recipe_id=recipe.id,
+                quantity=qty,
+                ingredient_name=name,
+            ))
+
+        db.session.commit()
+        flash("Recipe updated successfully!", "success")
+        return redirect(url_for("admin_panel"))
+
+    if request.method == "GET":
+        form.title.data = recipe.title
+        form.description.data = recipe.description
+        form.category.data = recipe.category
+        form.difficulty.data = recipe.difficulty
+        form.prep_time.data = recipe.prep_time
+        form.cook_time.data = recipe.cook_time
+        form.servings.data = recipe.servings
+        form.ingredients.data = "\n".join(
+            f"{ri.quantity} {ri.ingredient_name}".strip()
+            for ri in recipe.ingredients
+        )
+        form.instructions.data = recipe.instructions
+        form.youtube_url.data = recipe.youtube_url
+        form.img_class.data = recipe.img_class
+        form.cover_image.data = recipe.cover_image or ""
+        form.status.data = recipe.status
+
+    return render_template("screens/add_recipe.html", form=form, recipe=recipe)
+
+
+@app.route("/admin/delete-recipe/<int:recipe_id>", methods=["POST"])
+@admin_required
+def delete_recipe(recipe_id):
+    recipe = Recipe.query.get_or_404(recipe_id)
+    title = recipe.title
+    db.session.delete(recipe)
+    db.session.commit()
+    flash(f"Recipe '{title}' deleted.", "success")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/admin/delete-user/<int:user_id>", methods=["POST"])
+@admin_required
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.username == "admin":
+        flash("Cannot delete the admin account.", "danger")
+        return redirect(url_for("admin_panel"))
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"User '{user.username}' deleted.", "success")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/admin/reviews/<int:review_id>/delete", methods=["POST"])
+@admin_required
+def admin_delete_review(review_id):
+    review = Review.query.get_or_404(review_id)
+    db.session.delete(review)
+    db.session.commit()
+    flash("Review deleted.", "success")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/admin/add-category", methods=["POST"])
+@admin_required
+def add_category():
+    flash("Categories are managed in the codebase (CATEGORIES list in app.py).", "info")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/admin/delete-category/<int:cat_id>", methods=["POST"])
+@admin_required
+def delete_category(cat_id):
+    flash("Categories are managed in the codebase (CATEGORIES list in app.py).", "info")
+    return redirect(url_for("admin_panel"))
 
 
 # ─── Error handlers ──────────────────────────────────────────
 @app.errorhandler(404)
-def not_found(e):
+def not_found(_e):
     return render_template("screens/404.html"), 404
 
 
 @app.errorhandler(500)
-def server_error(e):
+def server_error(_e):
     return render_template("screens/404.html"), 500
 
 

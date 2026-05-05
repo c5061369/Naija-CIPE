@@ -7,7 +7,7 @@
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb" style="font-size:.88rem;">
       <li class="breadcrumb-item">
-        <a href="{{ url_for('admin.admin_panel') }}" style="color:var(--naija-green);">Admin</a>
+        <a href="{{ url_for('admin_panel') }}" style="color:var(--naija-green);">Admin</a>
       </li>
       <li class="breadcrumb-item">Recipes</li>
       <li class="breadcrumb-item active">{% if recipe %}Edit{% else %}Add{% endif %} Recipe</li>
@@ -20,7 +20,7 @@
       {% if recipe %}Edit: {{ recipe.title }}{% else %}Add New Recipe{% endif %}
     </h2>
     <div class="d-flex gap-2">
-      <a href="{{ url_for('admin.admin_panel') }}" class="btn btn-naija-outline">Cancel</a>
+      <a href="{{ url_for('admin_panel') }}" class="btn btn-naija-outline">Cancel</a>
       <button type="submit" form="recipeForm" class="btn btn-naija">
         {% if recipe %}Save changes{% else %}Publish{% endif %}
       </button>
@@ -28,7 +28,7 @@
   </div>
 
   <form id="recipeForm" method="POST"
-        action="{% if recipe %}{{ url_for('admin.edit_recipe', recipe_id=recipe.id) }}{% else %}{{ url_for('admin.add_recipe') }}{% endif %}"
+        action="{% if recipe %}{{ url_for('edit_recipe', recipe_id=recipe.id) }}{% else %}{{ url_for('add_recipe') }}{% endif %}"
         enctype="multipart/form-data" novalidate>
     {{ form.hidden_tag() }}
 
@@ -189,12 +189,14 @@
         <div class="mt-2 p-3" style="background:var(--naija-cream); border-radius:10px;">
           <strong><i class="bi bi-lightbulb"></i> Card preview</strong>
           <div class="recipe-card mt-2" style="box-shadow:none;">
-            <div class="img-placeholder img-egusi" data-label="Your Recipe" style="height:140px;">
-              <span class="time-badge">60 min</span>
+            <div id="preview-img-wrap" class="img-placeholder {{ form.img_class.data or 'img-egusi' }}" style="height:140px; overflow:hidden; padding:0; position:relative;">
+              <img id="preview-cover" src="" alt=""
+                   style="display:none; width:100%; height:140px; object-fit:cover;">
+              <span class="time-badge" id="preview-time">60 min</span>
             </div>
             <div class="body">
-              <span class="category-tag">Selected category</span>
-              <h5 style="font-size:.95rem;">Your recipe title…</h5>
+              <span class="category-tag" id="preview-category">Category</span>
+              <h5 style="font-size:.95rem;" id="preview-title">Your recipe title…</h5>
             </div>
           </div>
         </div>
@@ -204,4 +206,60 @@
   </form>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const previewTitle    = document.getElementById('preview-title');
+  const previewCategory = document.getElementById('preview-category');
+  const previewTime     = document.getElementById('preview-time');
+  const previewImgWrap  = document.getElementById('preview-img-wrap');
+  const previewCover    = document.getElementById('preview-cover');
+
+  function updateTime() {
+    const prep = parseInt(document.getElementById('prep_time').value) || 0;
+    const cook = parseInt(document.getElementById('cook_time').value) || 0;
+    previewTime.textContent = (prep + cook) + ' min';
+  }
+
+  function updateImage() {
+    const url = document.getElementById('cover_image').value.trim();
+    if (url) {
+      previewCover.src = url;
+      previewCover.style.display = 'block';
+      previewImgWrap.className = 'img-placeholder';
+      previewImgWrap.style.background = 'none';
+    } else {
+      previewCover.style.display = 'none';
+      previewCover.src = '';
+      const cls = document.getElementById('img_class').value || 'img-egusi';
+      previewImgWrap.className = 'img-placeholder ' + cls;
+      previewImgWrap.style.background = '';
+    }
+  }
+
+  document.getElementById('title').addEventListener('input', function() {
+    previewTitle.textContent = this.value || 'Your recipe title…';
+  });
+
+  document.getElementById('category').addEventListener('change', function() {
+    previewCategory.textContent = this.options[this.selectedIndex].text || 'Category';
+  });
+
+  document.getElementById('prep_time').addEventListener('input', updateTime);
+  document.getElementById('cook_time').addEventListener('input', updateTime);
+
+  document.getElementById('img_class').addEventListener('change', updateImage);
+  document.getElementById('cover_image').addEventListener('input', updateImage);
+
+  // Initialise preview from existing values (edit mode)
+  (function init() {
+    const t = document.getElementById('title').value;
+    if (t) previewTitle.textContent = t;
+    const cat = document.getElementById('category');
+    if (cat.selectedIndex > 0) previewCategory.textContent = cat.options[cat.selectedIndex].text;
+    updateTime();
+    updateImage();
+  })();
+</script>
 {% endblock %}

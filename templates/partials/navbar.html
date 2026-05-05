@@ -20,6 +20,14 @@
       </ul>
       <div class="d-flex gap-2">
         {% if session.get('logged_in') %}
+          {% if session.get('is_admin') %}
+            <a href="{{ url_for('admin_panel') }}" class="btn btn-sm" style="background:#f2a900;color:#123d2b;font-weight:600;">
+              <i class="bi bi-shield-lock-fill"></i> Admin
+            </a>
+            <a href="{{ url_for('add_recipe') }}" class="btn btn-outline-light btn-sm">
+              <i class="bi bi-plus-lg"></i> Add Recipe
+            </a>
+          {% endif %}
           <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-sm">Dashboard</a>
           <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Log out</a>
         {% else %}

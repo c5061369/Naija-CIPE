@@ -738,6 +738,19 @@ main {
   height: 48px;
   border-radius: 8px;
   flex-shrink: 0;
+  display: block;
+  object-fit: cover;
+}
+
+.review-thumb {
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: block;
+  object-fit: cover;
+  cursor: pointer;
+  padding: 0;
 }
 
 .action-icon {

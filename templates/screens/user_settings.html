@@ -31,13 +31,31 @@
       {# Profile #}
       <div class="form-wrap mb-3" id="profile-sec">
         <h5 class="mb-3"><i class="bi bi-person"></i> Profile information</h5>
+        <form id="avatar-form" method="POST" action="{{ url_for('upload_avatar') }}" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="file" id="avatar-input" name="avatar" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
+        </form>
         <div class="d-flex align-items-center gap-3 mb-4">
-          <div class="review-avatar" style="width:72px; height:72px; font-size:1.8rem;">{{ user.initial }}</div>
+          {% if user.avatar_url %}
+            <img src="{{ url_for('static', filename=user.avatar_url) }}"
+                 alt="Profile photo"
+                 style="width:72px; height:72px; border-radius:50%; object-fit:cover;">
+          {% else %}
+            <div class="review-avatar" style="width:72px; height:72px; font-size:1.8rem;">{{ user.initial }}</div>
+          {% endif %}
           <div>
-            <button class="btn btn-sm btn-naija-outline"><i class="bi bi-camera"></i> Change photo</button>
+            <button type="button" class="btn btn-sm btn-naija-outline"
+                    onclick="document.getElementById('avatar-input').click()">
+              <i class="bi bi-camera"></i> Change photo
+            </button>
           </div>
         </div>
-        <form method="POST" action="{{ url_for('user.update_profile') }}" novalidate>
+        <script>
+          document.getElementById('avatar-input').addEventListener('change', function() {
+            if (this.files.length) document.getElementById('avatar-form').submit();
+          });
+        </script>
+        <form method="POST" action="{{ url_for('update_profile') }}" novalidate>
           {{ profile_form.hidden_tag() }}
           <div class="row g-3">
             <div class="col-md-6">
@@ -78,7 +96,7 @@
       {# Password #}
       <div class="form-wrap mb-3" id="password-sec">
         <h5 class="mb-3"><i class="bi bi-shield-lock"></i> Change password</h5>
-        <form method="POST" action="{{ url_for('user.update_password') }}" novalidate>
+        <form method="POST" action="{{ url_for('update_password') }}" novalidate>
           {{ password_form.hidden_tag() }}
           <div class="row g-3">
             <div class="col-12">
@@ -164,7 +182,7 @@
             <strong class="text-danger">Delete my account</strong><br>
             <small class="text-muted">This will permanently remove your account, reviews and favourites. This action cannot be undone.</small>
           </div>
-          <form method="POST" action="{{ url_for('user.delete_account') }}"
+          <form method="POST" action="{{ url_for('delete_account') }}"
                 onsubmit="return confirm('Permanently delete your account? This cannot be undone.');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-sm btn-outline-danger">Delete account</button>

@@ -27,6 +27,10 @@ CREATE TABLE IF NOT EXISTS recipes (
     rating DECIMAL(3, 2),
     review_count INT DEFAULT 0,
     posted_by INT,
+    img_class VARCHAR(50) DEFAULT 'img-egusi',
+    youtube_url VARCHAR(500),
+    instructions TEXT,
+    status VARCHAR(20) DEFAULT 'published',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (posted_by) REFERENCES users(id)

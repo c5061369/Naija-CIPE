@@ -16,6 +16,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
     password = db.Column(db.String(255), nullable=False)
     full_name = db.Column(db.String(120))
+    avatar_url = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -51,10 +52,16 @@ class Recipe(db.Model):
     rating = db.Column(db.Float, default=0.0)
     review_count = db.Column(db.Integer, default=0)
     posted_by = db.Column(db.Integer, db.ForeignKey('users.id'))
+    img_class = db.Column(db.String(50), default='img-egusi')
+    cover_image = db.Column(db.String(500))
+    youtube_url = db.Column(db.String(500))
+    instructions = db.Column(db.Text)
+    status = db.Column(db.String(20), default='published')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
     # Relationships
+    poster = db.relationship('User', foreign_keys=[posted_by])
     ingredients = db.relationship('RecipeIngredient', backref='recipe', lazy=True, cascade='all, delete-orphan')
     reviews = db.relationship('Review', backref='recipe', lazy=True, cascade='all, delete-orphan')
     favourites = db.relationship('Favourite', backref='recipe', lazy=True, cascade='all, delete-orphan')

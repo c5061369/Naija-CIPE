@@ -16,16 +16,36 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.style.filter = "none";
 
   /* ── Favourite button toggle ────────────────────────────── */
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
+
   document.querySelectorAll(".fav-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const icon = btn.querySelector("i");
-      if (icon.classList.contains("bi-heart")) {
-        icon.classList.replace("bi-heart", "bi-heart-fill");
-        btn.style.color = "var(--naija-red)";
-      } else {
-        icon.classList.replace("bi-heart-fill", "bi-heart");
-      }
+      e.preventDefault();
+      const slug = btn.dataset.slug;
+      if (!slug) return;
+
+      fetch(`/favourites/toggle/${slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `csrf_token=${encodeURIComponent(csrfToken)}`,
+        redirect: "follow",
+      }).then((response) => {
+        if (response.url && response.url.includes("/login")) {
+          window.location.href = "/login";
+          return;
+        }
+        const icon = btn.querySelector("i");
+        if (icon.classList.contains("bi-heart")) {
+          icon.classList.replace("bi-heart", "bi-heart-fill");
+          btn.style.color = "var(--naija-red)";
+        } else {
+          icon.classList.replace("bi-heart-fill", "bi-heart");
+          btn.style.color = "";
+        }
+      }).catch(() => {
+        window.location.href = `/recipes/${slug}`;
+      });
     });
   });
 

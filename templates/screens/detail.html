@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import star_rating %}
+
+{% block title %}{{ recipe.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  {# Breadcrumb #}
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb" style="font-size:.88rem;">
+      <li class="breadcrumb-item">
+        <a href="{{ url_for('landing') }}" style="color:var(--naija-green);">Home</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{{ url_for('browse') }}" style="color:var(--naija-green);">Recipes</a>
+      </li>
+      <li class="breadcrumb-item">{{ recipe.category.name }}</li>
+      <li class="breadcrumb-item active">{{ recipe.title }}</li>
+    </ol>
+  </nav>
+
+  {# Recipe hero image #}
+  <div class="recipe-hero {{ recipe.img_class }}">
+    <div>
+      <span class="badge bg-warning text-dark mb-2">{{ recipe.category.name | upper }}</span>
+      <h1>{{ recipe.title }}</h1>
+      <div class="mt-3">
+        <span class="meta-pill">
+          <i class="bi bi-star-fill text-warning"></i>
+          {{ recipe.avg_rating }} ({{ recipe.review_count }} reviews)
+        </span>
+        <span class="meta-pill"><i class="bi bi-clock"></i> {{ recipe.total_time }} min</span>
+        <span class="meta-pill"><i class="bi bi-people"></i> Serves {{ recipe.servings }}</span>
+        <span class="meta-pill"><i class="bi bi-fire"></i> {{ recipe.difficulty }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-3">
+
+    {# Main column #}
+    <div class="col-lg-8">
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        {% if is_logged_in %}
+        <form method="POST" action="{{ url_for('toggle_favourite', slug=recipe.slug) }}" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn {% if user_has_favourited %}btn-naija{% else %}btn-naija-outline{% endif %}">
+            <i class="bi bi-heart{% if user_has_favourited %}-fill{% endif %} me-1"></i>
+            {% if user_has_favourited %}Saved{% else %}Save to favourites{% endif %}
+          </button>
+        </form>
+        <button class="btn btn-naija-outline">
+          <i class="bi bi-calendar-plus me-1"></i> Add to meal plan
+        </button>
+        {% endif %}
+        <button class="btn btn-naija-outline">
+          <i class="bi bi-share me-1"></i> Share
+        </button>
+        <button class="btn btn-naija-outline" onclick="window.print()">
+          <i class="bi bi-printer me-1"></i> Print
+        </button>
+      </div>
+
+      <p class="lead">{{ recipe.description }}</p>
+
+      {# Tabs #}
+      <ul class="nav nav-tabs nav-tabs-naija mt-4" id="recipeTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-ingredients" type="button">
+            <i class="bi bi-list-check"></i> Ingredients
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-instructions" type="button">
+            <i class="bi bi-card-list"></i> Instructions
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-video" type="button">
+            <i class="bi bi-youtube" style="color:#ff0000"></i> Video
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if request.path.endswith('#tab-reviews') %}active{% endif %}"
+                  data-bs-toggle="tab" data-bs-target="#tab-reviews" type="button">
+            <i class="bi bi-chat-dots"></i> Reviews ({{ recipe.review_count }})
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content py-4">
+
+        {# Ingredients tab #}
+        <div class="tab-pane fade show active" id="tab-ingredients">
+          {% for item in recipe.ingredient_list %}
+          <div class="ingredient-item">
+            <span class="ingredient-qty">{{ item.qty }}</span>
+            <span>{{ item.name }}</span>
+          </div>
+          {% endfor %}
+        </div>
+
+        {# Instructions tab #}
+        <div class="tab-pane fade" id="tab-instructions">
+          {% for step in recipe.instruction_list %}
+          <div class="step-card">
+            <div class="step-num">{{ step.step_num }}</div>
+            <div>
+              <strong>{{ step.title }}.</strong> {{ step.body }}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {# Video tab #}
+        <div class="tab-pane fade" id="tab-video">
+          {% if recipe.youtube_url %}
+          <div class="ratio ratio-16x9">
+            <iframe src="{{ recipe.youtube_url | replace('watch?v=', 'embed/') }}"
+                    title="Recipe video" allowfullscreen></iframe>
+          </div>
+          {% else %}
+          <div class="video-placeholder">
+            <div class="play-btn"><i class="bi bi-play-fill"></i></div>
+          </div>
+          <p class="mt-3 text-muted">
+            <i class="bi bi-youtube" style="color:#ff0000"></i>
+            No video has been added for this recipe yet.
+          </p>
+          {% endif %}
+        </div>
+
+        {# Reviews tab #}
+        <div class="tab-pane fade" id="tab-reviews">
+
+          {% if is_logged_in and not user_has_reviewed %}
+          <div class="form-wrap mb-4">
+            <h6 class="mb-3">Leave a review</h6>
+            <form method="POST" action="{{ url_for('post_review', slug=recipe.slug) }}" novalidate>
+              {{ review_form.csrf_token }}
+              <div class="mb-2">
+                <span class="stars fs-4" style="cursor:pointer;" id="starRating">
+                  {% for i in range(5) %}<i class="bi bi-star" data-star="{{ i + 1 }}"></i>{% endfor %}
+                </span>
+                <input type="hidden" name="rating" id="ratingInput" value="">
+              </div>
+              {% for error in review_form.rating.errors %}
+              <div class="text-danger small mb-2">{{ error }}</div>
+              {% endfor %}
+              <textarea class="form-control mb-3 {% if review_form.body.errors %}is-invalid{% endif %}"
+                        name="body" rows="3"
+                        placeholder="How did it turn out?">{{ review_form.body.data or '' }}</textarea>
+              {% for error in review_form.body.errors %}
+              <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+              <button class="btn btn-naija">Post review</button>
+            </form>
+          </div>
+          {% elif is_logged_in and user_has_reviewed %}
+          <div class="alert alert-info mb-4">
+            <i class="bi bi-check-circle"></i> You have already reviewed this recipe.
+          </div>
+          {% endif %}
+
+          {% for review in recipe.review_list if review.status == 'approved' %}
+          <div class="review-item">
+            <div class="d-flex gap-3">
+              <div class="review-avatar"
+                   {% if review.user.avatar_bg == 'gold' %}style="background:var(--naija-gold);color:var(--naija-dark);"
+                   {% elif review.user.avatar_bg == 'red' %}style="background:var(--naija-red);"
+                   {% endif %}>
+                {{ review.user.initial }}
+              </div>
+              <div>
+                <strong>{{ review.user.full_name }}</strong>
+                <small class="text-muted"> · {{ review.created_at.strftime('%-d %b %Y') }}</small>
+                <div class="stars">
+                  {% for i in range(review.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                  {% for i in range(5 - review.rating) %}<i class="bi bi-star"></i>{% endfor %}
+                </div>
+                <p class="mb-0 mt-1">{{ review.body }}</p>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          {% if not is_logged_in %}
+          <p class="text-muted">
+            <a href="{{ url_for('login') }}" style="color:var(--naija-green);">Log in</a>
+            to be the first to review this recipe.
+          </p>
+          {% endif %}
+          {% endfor %}
+
+        </div>
+
+      </div>
+    </div>
+
+    {# Sidebar #}
+    <div class="col-lg-4">
+      <div class="form-wrap mb-3">
+        <h6 class="mb-3">Recipe info</h6>
+        <div class="d-flex justify-content-between py-2 border-bottom">
+          <span class="text-muted">Prep time</span><strong>{{ recipe.prep_time }} min</strong>
+        </div>
+        <div class="d-flex justify-content-between py-2 border-bottom">
+          <span class="text-muted">Cook time</span><strong>{{ recipe.cook_time }} min</strong>
+        </div>
+        <div class="d-flex justify-content-between py-2 border-bottom">
+          <span class="text-muted">Total</span><strong>{{ recipe.total_time }} min</strong>
+        </div>
+        <div class="d-flex justify-content-between py-2 border-bottom">
+          <span class="text-muted">Servings</span><strong>{{ recipe.servings }}</strong>
+        </div>
+        <div class="d-flex justify-content-between py-2">
+          <span class="text-muted">Posted by</span><strong>{{ recipe.posted_by }}</strong>
+        </div>
+      </div>
+
+      <div class="form-wrap">
+        <h6 class="mb-3">You might also like</h6>
+        {% for rel in related %}
+        <a href="{{ url_for('recipe_detail', slug=rel.slug) }}" class="d-flex gap-3 mb-3 text-decoration-none">
+          <div class="img-placeholder {{ rel.img_class }}"
+               style="width:70px; height:70px; border-radius:8px; flex-shrink:0; padding:0;"></div>
+          <div>
+            <strong style="font-size:.92rem; color: var(--naija-dark);">{{ rel.title }}</strong><br>
+            <small class="text-muted stars">
+              <i class="bi bi-star-fill"></i> {{ rel.avg_rating }} · {{ rel.total_time }} min
+            </small>
+          </div>
+        </a>
+        {% else %}
+        <p class="text-muted small">No related recipes found.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const stars = document.querySelectorAll('#starRating .bi');
+  stars.forEach((star, idx) => {
+    star.addEventListener('click', () => {
+      document.getElementById('ratingInput').value = idx + 1;
+      stars.forEach((s, i) => {
+        s.className = i <= idx ? 'bi bi-star-fill' : 'bi bi-star';
+      });
+    });
+    star.addEventListener('mouseover', () => {
+      stars.forEach((s, i) => {
+        s.className = i <= idx ? 'bi bi-star-fill' : 'bi bi-star';
+      });
+    });
+    star.addEventListener('mouseout', () => {
+      const current = parseInt(document.getElementById('ratingInput').value) || 0;
+      stars.forEach((s, i) => {
+        s.className = i < current ? 'bi bi-star-fill' : 'bi bi-star';
+      });
+    });
+  });
+</script>
+{% endblock %}

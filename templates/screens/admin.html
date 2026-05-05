@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row g-3">
+
+    {# Sidebar #}
+    <div class="col-lg-2">
+      <div class="admin-sidebar">
+        <div class="text-center mb-3 pb-3" style="border-bottom: 1px solid rgba(255,255,255,.1);">
+          <i class="bi bi-shield-lock-fill" style="color:var(--naija-gold); font-size:1.8rem;"></i>
+          <h6 style="color:#fff; margin:8px 0 0;">Admin Panel</h6>
+          <small class="text-white-50">@{{ current_user }}</small>
+        </div>
+        {% set admin_links = [
+          ("dashboard",  "bi-speedometer2",       "Dashboard"),
+          ("recipes",    "bi-egg-fried",           "Recipes"),
+          ("users",      "bi-people",              "Users"),
+          ("reviews",    "bi-chat-square-text",    "Reviews"),
+          ("categories", "bi-tags",                "Categories"),
+          ("analytics",  "bi-bar-chart",           "Analytics"),
+          ("settings",   "bi-gear",                "Settings"),
+        ] %}
+        {% for view, icon, label in admin_links %}
+        <a href="#" class="admin-link {% if active_view == view %}active{% endif %}"
+           data-adminview="{{ view }}">
+          <i class="bi {{ icon }}"></i> {{ label }}
+        </a>
+        {% endfor %}
+        <div class="mt-3 pt-3" style="border-top: 1px solid rgba(255,255,255,.1);">
+          <a class="admin-link" href="{{ url_for('landing') }}">
+            <i class="bi bi-box-arrow-left"></i> Back to site
+          </a>
+        </div>
+      </div>
+    </div>
+
+    {# Main content — views toggled by JS #}
+    <div class="col-lg-10">
+
+      {# ── Dashboard view ── #}
+      <div class="admin-view" data-adminview="dashboard">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="mb-0">Dashboard</h2>
+          <a href="{{ url_for('add_recipe') }}" class="btn btn-naija">
+            <i class="bi bi-plus-lg"></i> Add Recipe
+          </a>
+        </div>
+
+        <div class="row g-3 mb-4">
+          {% set dash_stats = [
+            ("bi-egg-fried",      "#E0F4EC","var(--naija-green)",    stats.recipes, "Total Recipes",   "+12 this month"),
+            ("bi-people",         "#FFF3D1","var(--naija-gold-dark)",stats.users,   "Registered Users","+342 this month"),
+            ("bi-chat-dots-fill", "#FFE0E0","var(--naija-red)",      stats.reviews, "Reviews",         "+89 this week"),
+            ("bi-hourglass-split","#E8E4FF","#6B4FCF",               stats.pending, "Pending Review",  "Needs attention"),
+          ] %}
+          {% for icon, bg, color, value, label, sub in dash_stats %}
+          <div class="col-md-3 col-6">
+            <div class="stat-card">
+              <div class="stat-icon" style="background:{{ bg }}; color:{{ color }};">
+                <i class="bi {{ icon }}"></i>
+              </div>
+              <h3>{{ value }}</h3>
+              <small>{{ label }}</small><br>
+              <small class="text-muted" style="font-size:.75rem;">{{ sub }}</small>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {# Recent recipes table #}
+        <div class="admin-table mb-4">
+          <div class="p-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Recent recipes</h5>
+            <a href="#" class="btn btn-sm btn-naija-outline" data-adminview-go="recipes">View all</a>
+          </div>
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>Recipe</th><th>Category</th><th>Difficulty</th>
+                <th>Rating</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for recipe in recent_recipes %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    {% if recipe.cover_image %}
+                      <img src="{{ recipe.cover_image }}" alt="{{ recipe.title }}" class="thumb">
+                    {% else %}
+                      <div class="thumb img-placeholder {{ recipe.img_class or 'img-egusi' }}" style="padding:0;"></div>
+                    {% endif %}
+                    <strong>{{ recipe.title }}</strong>
+                  </div>
+                </td>
+                <td>{{ recipe.category }}</td>
+                <td><span class="badge badge-diff-{{ recipe.difficulty | lower }}">{{ recipe.difficulty }}</span></td>
+                <td><span class="stars"><i class="bi bi-star-fill"></i> {{ "%.1f" | format(recipe.rating or 0) }}</span></td>
+                <td>
+                  {% if recipe.status == 'published' %}<span class="badge bg-success">Published</span>
+                  {% elif recipe.status == 'draft' %}<span class="badge bg-secondary">Draft</span>
+                  {% else %}<span class="badge bg-warning text-dark">Pending</span>{% endif %}
+                </td>
+                <td>
+                  <a href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}"
+                     class="action-icon edit me-1" title="Edit"><i class="bi bi-pencil"></i></a>
+                  <form method="POST" action="{{ url_for('delete_recipe', recipe_id=recipe.id) }}"
+                        style="display:inline;"
+                        onsubmit="return confirm('Delete {{ recipe.title }}?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="action-icon delete border-0 bg-transparent" title="Delete">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>{# /dashboard view #}
+
+      {# ── Recipes view ── #}
+      <div class="admin-view" data-adminview="recipes" style="display:none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="mb-0">Manage Recipes</h2>
+          <a href="{{ url_for('add_recipe') }}" class="btn btn-naija">
+            <i class="bi bi-plus-lg"></i> Add Recipe
+          </a>
+        </div>
+        <div class="admin-table">
+          <table class="table mb-0">
+            <thead>
+              <tr>
+                <th>Recipe</th><th>Category</th><th>Difficulty</th>
+                <th>Rating</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for recipe in all_recipes %}
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    {% if recipe.cover_image %}
+                      <img src="{{ recipe.cover_image }}" alt="{{ recipe.title }}" class="thumb">
+                    {% else %}
+                      <div class="thumb img-placeholder {{ recipe.img_class or 'img-egusi' }}" style="padding:0;"></div>
+                    {% endif %}
+                    <strong>{{ recipe.title }}</strong>
+                  </div>
+                </td>
+                <td>{{ recipe.category }}</td>
+                <td><span class="badge badge-diff-{{ recipe.difficulty | lower }}">{{ recipe.difficulty }}</span></td>
+                <td><span class="stars"><i class="bi bi-star-fill"></i> {{ "%.1f" | format(recipe.rating or 0) }}</span></td>
+                <td>
+                  {% if recipe.status == 'published' %}<span class="badge bg-success">Published</span>
+                  {% elif recipe.status == 'draft' %}<span class="badge bg-secondary">Draft</span>
+                  {% else %}<span class="badge bg-warning text-dark">Pending</span>{% endif %}
+                </td>
+                <td>
+                  <a href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}"
+                     class="action-icon edit me-1"><i class="bi bi-pencil"></i></a>
+                  <form method="POST" action="{{ url_for('delete_recipe', recipe_id=recipe.id) }}"
+                        style="display:inline;"
+                        onsubmit="return confirm('Delete {{ recipe.title }}?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="action-icon delete border-0 bg-transparent">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>{# /recipes view #}
+
+      {# ── Users view ── #}
+      <div class="admin-view" data-adminview="users" style="display:none;">
+        <h2 class="mb-3">Manage Users</h2>
+        <div class="admin-table">
+          <table class="table mb-0">
+            <thead>
+              <tr><th>User</th><th>Email</th><th>Joined</th><th>Reviews</th><th>Role</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {% for u in all_users %}
+              <tr>
+                <td><strong>{{ u.full_name }}</strong><br><small class="text-muted">@{{ u.username }}</small></td>
+                <td><small class="text-muted">{{ u.email }}</small></td>
+                <td>{{ u.created_at.strftime('%b %Y') }}</td>
+                <td>{{ u.reviews | length }}</td>
+                <td>
+                  {% if u.username == 'admin' %}
+                    <span class="badge bg-danger">Admin</span>
+                  {% else %}
+                    <span class="badge bg-secondary">User</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if u.username != 'admin' %}
+                  <form method="POST" action="{{ url_for('delete_user', user_id=u.id) }}"
+                        style="display:inline;"
+                        onsubmit="return confirm('Delete user @{{ u.username }}?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="action-icon delete border-0 bg-transparent">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>{# /users view #}
+
+      {# ── Reviews view ── #}
+      <div class="admin-view" data-adminview="reviews" style="display:none;">
+        <h2 class="mb-3">Manage Reviews</h2>
+        <div class="admin-table">
+          <table class="table mb-0">
+            <thead>
+              <tr><th>Recipe</th><th>Author</th><th>Rating</th><th>Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {% for review in all_reviews %}
+              <tr>
+                <td><strong>{{ review.recipe.title if review.recipe else '—' }}</strong></td>
+                <td>{{ review.author.full_name if review.author else 'Unknown' }}</td>
+                <td>
+                  <span class="stars">
+                    {% for i in range(review.rating or 0) %}<i class="bi bi-star-fill"></i>{% endfor %}
+                  </span>
+                </td>
+                <td>{{ review.created_at.strftime('%-d %b %Y') }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin_delete_review', review_id=review.id) }}"
+                        style="display:inline;"
+                        onsubmit="return confirm('Delete this review?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="action-icon delete border-0 bg-transparent">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>{# /reviews view #}
+
+      {# ── Categories view ── #}
+      <div class="admin-view" data-adminview="categories" style="display:none;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="mb-0">Categories</h2>
+          <button class="btn btn-naija" data-bs-toggle="collapse" data-bs-target="#addCatForm">
+            <i class="bi bi-plus-lg"></i> Add Category
+          </button>
+        </div>
+
+        {# Add category form #}
+        <div class="collapse mb-3" id="addCatForm">
+          <div class="form-wrap">
+            <h6 class="mb-3">New category</h6>
+            <form method="POST" action="{{ url_for('add_category') }}" novalidate>
+              {{ category_form.hidden_tag() }}
+              <div class="row g-2">
+                <div class="col-md-5">
+                  <input type="text" class="form-control" name="name" placeholder="Category name" required>
+                </div>
+                <div class="col-md-4">
+                  <input type="text" class="form-control" name="icon_class"
+                         placeholder="bi-egg-fried" required>
+                </div>
+                <div class="col-md-3">
+                  <button type="submit" class="btn btn-naija w-100">Add</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="admin-table">
+          <table class="table mb-0">
+            <thead><tr><th>Category</th><th>Recipes</th></tr></thead>
+            <tbody>
+              {% for cat in all_categories %}
+              <tr>
+                <td><strong>{{ cat.name }}</strong></td>
+                <td>{{ cat.recipe_count }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>{# /categories view #}
+
+      {# ── Analytics view ── #}
+      <div class="admin-view" data-adminview="analytics" style="display:none;">
+        <h2 class="mb-3">Analytics</h2>
+        <div class="row g-3">
+          {% for label, value, sub in [
+            ("Page views (7d)","14,820","+18% vs last week"),
+            ("Unique visitors","3,241","+12% vs last week"),
+            ("Recipe saves",  "892",  "+9% vs last week"),
+            ("Reviews posted","134",  "+22% vs last week"),
+          ] %}
+          <div class="col-md-3 col-6">
+            <div class="stat-card text-center">
+              <h3>{{ value }}</h3>
+              <small>{{ label }}</small><br>
+              <small class="text-success">{{ sub }}</small>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="form-wrap mt-4 text-center text-muted py-5">
+          <i class="bi bi-bar-chart fs-1"></i>
+          <p class="mt-3">Charts will render here in production (e.g. Chart.js or Plotly).</p>
+        </div>
+      </div>{# /analytics view #}
+
+      {# ── Settings view ── #}
+      <div class="admin-view" data-adminview="settings" style="display:none;">
+        <h2 class="mb-3">Site Settings</h2>
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <div class="form-wrap mb-3">
+              <h5 class="mb-3">General</h5>
+              <div class="mb-3">
+                <label class="form-label">Site name</label>
+                <input class="form-control" value="NaijaCipe">
+              </div>
+              <div class="mb-3">
+                <label class="form-label">User registration</label>
+                <select class="form-select">
+                  <option>Open — anyone can sign up</option>
+                  <option>Invite-only</option>
+                  <option>Closed</option>
+                </select>
+              </div>
+              {% for id, checked, label in [
+                ("s1", True,  "Require email verification on signup"),
+                ("s2", True,  "Auto-approve reviews"),
+                ("s3", False, "Maintenance mode (site offline)"),
+              ] %}
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="{{ id }}" {% if checked %}checked{% endif %}>
+                <label class="form-check-label" for="{{ id }}">{{ label }}</label>
+              </div>
+              {% endfor %}
+              <button class="btn btn-naija mt-2">Save changes</button>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="form-wrap">
+              <h5 class="mb-3">Danger zone</h5>
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-3"
+                   style="border-bottom: 1px solid var(--naija-gray-200);">
+                <div>
+                  <strong>Rebuild search index</strong><br>
+                  <small class="text-muted">Full-text index for recipe search.</small>
+                </div>
+                <button class="btn btn-sm btn-naija-outline">Rebuild</button>
+              </div>
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                  <strong class="text-danger">Export all data</strong><br>
+                  <small class="text-muted">Download database dump + uploads folder.</small>
+                </div>
+                <button class="btn btn-sm btn-outline-danger">Export</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>{# /settings view #}
+
+    </div>{# /col-lg-10 #}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function showAdminView(view) {
+    document.querySelectorAll('.admin-view').forEach(v => {
+      v.style.display = v.dataset.adminview === view ? 'block' : 'none';
+    });
+    document.querySelectorAll('.admin-link').forEach(l => {
+      l.classList.toggle('active', l.dataset.adminview === view);
+    });
+  }
+
+  document.querySelectorAll('.admin-link[data-adminview]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      showAdminView(link.dataset.adminview);
+    });
+  });
+
+  document.querySelectorAll('[data-adminview-go]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      showAdminView(btn.dataset.adminviewGo);
+    });
+  });
+
+  showAdminView('{{ active_view }}');
+</script>
+{% endblock %}
