@@ -206,22 +206,39 @@ main {
   font-size: 0.95rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+.hero-tile:hover {
+  transform: scale(0.9);
 }
 .tile-jollof {
   background: linear-gradient(135deg, #d64545, #8b2525);
   transform: translateY(10px);
 }
+.tile-jollof:hover {
+  transform: translateY(10px) scale(0.9);
+}
 .tile-egusi {
   background: linear-gradient(135deg, #5a8c3a, #2f5820);
   transform: translateY(-20px);
+}
+.tile-egusi:hover {
+  transform: translateY(-20px) scale(0.9);
 }
 .tile-suya {
   background: linear-gradient(135deg, #8b4513, #4a2610);
   transform: translateY(20px);
 }
+.tile-suya:hover {
+  transform: translateY(20px) scale(0.9);
+}
 .tile-chinchin {
   background: linear-gradient(135deg, #e3a71c, #b8851a);
   transform: translateY(-10px);
+}
+.tile-chinchin:hover {
+  transform: translateY(-10px) scale(0.9);
 }
 
 /* ── Recipe cards ─────────────────────────────────────────────── */

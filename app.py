@@ -450,7 +450,7 @@ def dashboard():
                 "icon_bg": "#FFE0E0",
                 "icon_color": "var(--naija-red)",
                 "text": f"You favourited <strong>{fav.recipe.title}</strong>",
-                "date": fav.created_at.strftime("%-d %b %Y"),
+                "date": fav.created_at.strftime("%d %b %Y"),
                 "action_url": url_for("recipe_detail", slug=fav.recipe.slug),
                 "action_label": "View",
             })
@@ -465,7 +465,7 @@ def dashboard():
                 "icon_bg": "#E0F4EC",
                 "icon_color": "var(--naija-green)",
                 "text": f"You reviewed <strong>{rv.recipe.title}</strong> — gave it {rv.rating} stars",
-                "date": rv.created_at.strftime("%-d %b %Y"),
+                "date": rv.created_at.strftime("%d %b %Y"),
                 "action_url": url_for("my_reviews"),
                 "action_label": "See",
             })

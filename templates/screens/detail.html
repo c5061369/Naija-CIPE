@@ -174,7 +174,7 @@
               </div>
               <div>
                 <strong>{{ review.user.full_name }}</strong>
-                <small class="text-muted"> · {{ review.created_at.strftime('%-d %b %Y') }}</small>
+                <small class="text-muted"> · {{ review.created_at.strftime('%d %b %Y') }}</small>
                 <div class="stars">
                   {% for i in range(review.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
                   {% for i in range(5 - review.rating) %}<i class="bi bi-star"></i>{% endfor %}

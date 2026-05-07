@@ -54,7 +54,7 @@
               {% for i in range(5 - review.rating) %}<i class="bi bi-star"></i>{% endfor %}
             </div>
           </div>
-          <small class="text-muted">{{ review.created_at.strftime('%-d %b %Y') }}</small>
+          <small class="text-muted">{{ review.created_at.strftime('%d %b %Y') }}</small>
         </div>
         <p class="mb-2 mt-1">{{ review.body }}</p>
         <div class="d-flex gap-2">
