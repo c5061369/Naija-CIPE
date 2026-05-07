@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/mac/Library/CloudStorage/OneDrive-SheffieldHallamUniversity/NaijaCipeDev/Naija-CIPE/venv"
+VIRTUAL_ENV="/Users/ufuomaakpoguma/Library/CloudStorage/OneDrive-SheffieldHallamUniversity/NaijaCipeDev/Naija-CIPE/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

@@ -29,7 +29,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/Users/mac/Library/CloudStorage/OneDrive-SheffieldHallamUniversity/NaijaCipeDev/Naija-CIPE/venv"
+set -gx VIRTUAL_ENV "/Users/ufuomaakpoguma/Library/CloudStorage/OneDrive-SheffieldHallamUniversity/NaijaCipeDev/Naija-CIPE/venv"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH
