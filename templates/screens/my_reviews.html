@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import dashboard_tabs %}
+{% block title %}My Reviews{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="mb-1"><i class="bi bi-chat-dots-fill text-naija-green"></i> My Reviews</h2>
+      <small class="text-muted">
+        {{ reviews | length }} reviews posted
+        {% if reviews %}
+         — average rating you give:
+          {{ (reviews | map(attribute='rating') | list | sum / reviews | length) | round(1) }}
+        {% endif %}
+      </small>
+    </div>
+    <div class="d-flex gap-2">
+      <select class="form-select form-select-sm" style="width:auto;">
+        <option>All ratings</option>
+        <option>5 stars</option><option>4 stars</option><option>3 stars or fewer</option>
+      </select>
+      <select class="form-select form-select-sm" style="width:auto;">
+        <option>Newest first</option><option>Oldest first</option><option>Highest rated</option>
+      </select>
+    </div>
+  </div>
+
+  {{ dashboard_tabs('reviews') }}
+
+  <div class="form-wrap">
+    {% for review in reviews %}
+    <div class="d-flex gap-3 py-3 {% if not loop.last %}border-bottom{% endif %}"
+         style="border-color: var(--naija-gray-200);">
+      <a href="{{ url_for('recipe_detail', slug=review.recipe.slug) }}">
+        {% if review.recipe.cover_image %}
+          <img src="{{ review.recipe.cover_image }}" alt="{{ review.recipe.title }}"
+               class="review-thumb">
+        {% else %}
+          <div class="img-placeholder {{ review.recipe.img_class }} review-thumb"></div>
+        {% endif %}
+      </a>
+      <div class="flex-grow-1">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+          <div>
+            <a href="{{ url_for('recipe_detail', slug=review.recipe.slug) }}"
+               class="text-decoration-none" style="color: var(--naija-dark);">
+              <strong>{{ review.recipe.title }}</strong>
+            </a>
+            <small class="text-muted"> · {{ review.recipe.category.name }}</small>
+            <div class="stars">
+              {% for i in range(review.rating) %}<i class="bi bi-star-fill"></i>{% endfor %}
+              {% for i in range(5 - review.rating) %}<i class="bi bi-star"></i>{% endfor %}
+            </div>
+          </div>
+          <small class="text-muted">{{ review.created_at.strftime('%d %b %Y') }}</small>
+        </div>
+        <p class="mb-2 mt-1">{{ review.body }}</p>
+        <div class="d-flex gap-2">
+          <form method="POST"
+                action="{{ url_for('delete_user_review', review_id=review.id) }}"
+                onsubmit="return confirm('Delete this review?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-chat-dots fs-1 text-muted"></i>
+      <p class="mt-3 text-muted">You haven't posted any reviews yet. Cook a recipe and share your experience!</p>
+      <a class="btn btn-naija" href="{{ url_for('browse') }}">Browse Recipes</a>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% block title %}{% if recipe %}Edit Recipe{% else %}Add Recipe{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb" style="font-size:.88rem;">
+      <li class="breadcrumb-item">
+        <a href="{{ url_for('admin_panel') }}" style="color:var(--naija-green);">Admin</a>
+      </li>
+      <li class="breadcrumb-item">Recipes</li>
+      <li class="breadcrumb-item active">{% if recipe %}Edit{% else %}Add{% endif %} Recipe</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+      <i class="bi bi-{% if recipe %}pencil{% else %}plus-circle{% endif %} text-naija-green"></i>
+      {% if recipe %}Edit: {{ recipe.title }}{% else %}Add New Recipe{% endif %}
+    </h2>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin_panel') }}" class="btn btn-naija-outline">Cancel</a>
+      <button type="submit" form="recipeForm" class="btn btn-naija">
+        {% if recipe %}Save changes{% else %}Publish{% endif %}
+      </button>
+    </div>
+  </div>
+
+  <form id="recipeForm" method="POST"
+        action="{% if recipe %}{{ url_for('edit_recipe', recipe_id=recipe.id) }}{% else %}{{ url_for('add_recipe') }}{% endif %}"
+        enctype="multipart/form-data" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="row g-4">
+      {# Left column — content #}
+      <div class="col-md-8">
+
+        <div class="form-wrap mb-4">
+          <h5 class="mb-3">Basic info</h5>
+          <div class="mb-3">
+            <label class="form-label" for="title">Recipe title *</label>
+            <input type="text"
+                   class="form-control {% if form.title.errors %}is-invalid{% endif %}"
+                   id="title" name="title"
+                   placeholder="e.g. Classic Jollof Rice"
+                   value="{{ form.title.data or '' }}" required>
+            {% for e in form.title.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="description">Short description *</label>
+            <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}"
+                      id="description" name="description" rows="2"
+                      placeholder="One or two sentences to entice readers…" required>{{ form.description.data or '' }}</textarea>
+            {% for e in form.description.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="form-wrap mb-4">
+          <h5 class="mb-3">Ingredients</h5>
+          <p class="text-muted small">One ingredient per line — qty then name, e.g. "2 cups egusi seeds, ground"</p>
+          <textarea class="form-control {% if form.ingredients.errors %}is-invalid{% endif %}"
+                    name="ingredients" rows="8"
+                    placeholder="2 cups egusi seeds, ground&#10;500g assorted meat&#10;1 cup palm oil&#10;…">{{ form.ingredients.data or '' }}</textarea>
+          {% for e in form.ingredients.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="form-wrap mb-4">
+          <h5 class="mb-3">Instructions</h5>
+          <p class="text-muted small">One step per line — they will be numbered automatically.</p>
+          <textarea class="form-control {% if form.instructions.errors %}is-invalid{% endif %}"
+                    name="instructions" rows="8"
+                    placeholder="Season the meat and boil for 20 minutes…&#10;Fry onions and add egusi paste…&#10;…">{{ form.instructions.data or '' }}</textarea>
+          {% for e in form.instructions.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="form-wrap mb-4">
+          <h5 class="mb-3">Video tutorial</h5>
+          <div class="mb-3">
+            <label class="form-label" for="youtube_url">YouTube URL (optional)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white">
+                <i class="bi bi-youtube" style="color:#ff0000;"></i>
+              </span>
+              <input type="url" class="form-control" id="youtube_url" name="youtube_url"
+                     placeholder="https://www.youtube.com/watch?v=…"
+                     value="{{ form.youtube_url.data or '' }}">
+            </div>
+            <small class="text-muted">Paste a YouTube link — the video will be embedded on the recipe page.</small>
+          </div>
+        </div>
+
+      </div>
+
+      {# Right column — metadata #}
+      <div class="col-md-4">
+        <div class="form-wrap mb-4">
+          <h5 class="mb-3">Details</h5>
+
+          <div class="mb-3">
+            <label class="form-label" for="category">Category *</label>
+            <select class="form-select {% if form.category.errors %}is-invalid{% endif %}"
+                    id="category" name="category" required>
+              <option value="">Choose…</option>
+              {% for value, label in form.category.choices %}
+              <option value="{{ value }}" {% if form.category.data == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+            {% for e in form.category.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+
+          <div class="row g-2">
+            <div class="col-6 mb-3">
+              <label class="form-label" for="prep_time">Prep (min) *</label>
+              <input type="number" class="form-control {% if form.prep_time.errors %}is-invalid{% endif %}"
+                     id="prep_time" name="prep_time"
+                     placeholder="15" min="1"
+                     value="{{ form.prep_time.data or '' }}" required>
+              {% for e in form.prep_time.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label" for="cook_time">Cook (min) *</label>
+              <input type="number" class="form-control {% if form.cook_time.errors %}is-invalid{% endif %}"
+                     id="cook_time" name="cook_time"
+                     placeholder="45" min="1"
+                     value="{{ form.cook_time.data or '' }}" required>
+              {% for e in form.cook_time.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+          </div>
+
+          <div class="row g-2">
+            <div class="col-6 mb-3">
+              <label class="form-label" for="servings">Servings *</label>
+              <input type="number" class="form-control {% if form.servings.errors %}is-invalid{% endif %}"
+                     id="servings" name="servings"
+                     placeholder="6" min="1"
+                     value="{{ form.servings.data or '' }}" required>
+              {% for e in form.servings.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label" for="difficulty">Difficulty *</label>
+              <select class="form-select {% if form.difficulty.errors %}is-invalid{% endif %}"
+                      id="difficulty" name="difficulty" required>
+                <option value="">Choose…</option>
+                {% for value, label in form.difficulty.choices %}
+                <option value="{{ value }}" {% if form.difficulty.data == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+                {% endfor %}
+              </select>
+              {% for e in form.difficulty.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="img_class">Image style</label>
+            <select class="form-select" id="img_class" name="img_class">
+              {% for value, label in form.img_class.choices %}
+              <option value="{{ value }}" {% if form.img_class.data == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="status">Status</label>
+            <select class="form-select" id="status" name="status">
+              {% for value, label in form.status.choices %}
+              <option value="{{ value }}" {% if form.status.data == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="cover_image">Cover image URL</label>
+            <input type="url" class="form-control" id="cover_image" name="cover_image"
+                   placeholder="https://…"
+                   value="{{ form.cover_image.data or '' }}">
+            <small class="text-muted">Optional external image URL.</small>
+          </div>
+        </div>
+
+        {# Preview card #}
+        <div class="mt-2 p-3" style="background:var(--naija-cream); border-radius:10px;">
+          <strong><i class="bi bi-lightbulb"></i> Card preview</strong>
+          <div class="recipe-card mt-2" style="box-shadow:none;">
+            <div id="preview-img-wrap" class="img-placeholder {{ form.img_class.data or 'img-egusi' }}" style="height:140px; overflow:hidden; padding:0; position:relative;">
+              <img id="preview-cover" src="" alt=""
+                   style="display:none; width:100%; height:140px; object-fit:cover;">
+              <span class="time-badge" id="preview-time">60 min</span>
+            </div>
+            <div class="body">
+              <span class="category-tag" id="preview-category">Category</span>
+              <h5 style="font-size:.95rem;" id="preview-title">Your recipe title…</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const previewTitle    = document.getElementById('preview-title');
+  const previewCategory = document.getElementById('preview-category');
+  const previewTime     = document.getElementById('preview-time');
+  const previewImgWrap  = document.getElementById('preview-img-wrap');
+  const previewCover    = document.getElementById('preview-cover');
+
+  function updateTime() {
+    const prep = parseInt(document.getElementById('prep_time').value) || 0;
+    const cook = parseInt(document.getElementById('cook_time').value) || 0;
+    previewTime.textContent = (prep + cook) + ' min';
+  }
+
+  function updateImage() {
+    const url = document.getElementById('cover_image').value.trim();
+    if (url) {
+      previewCover.src = url;
+      previewCover.style.display = 'block';
+      previewImgWrap.className = 'img-placeholder';
+      previewImgWrap.style.background = 'none';
+    } else {
+      previewCover.style.display = 'none';
+      previewCover.src = '';
+      const cls = document.getElementById('img_class').value || 'img-egusi';
+      previewImgWrap.className = 'img-placeholder ' + cls;
+      previewImgWrap.style.background = '';
+    }
+  }
+
+  document.getElementById('title').addEventListener('input', function() {
+    previewTitle.textContent = this.value || 'Your recipe title…';
+  });
+
+  document.getElementById('category').addEventListener('change', function() {
+    previewCategory.textContent = this.options[this.selectedIndex].text || 'Category';
+  });
+
+  document.getElementById('prep_time').addEventListener('input', updateTime);
+  document.getElementById('cook_time').addEventListener('input', updateTime);
+
+  document.getElementById('img_class').addEventListener('change', updateImage);
+  document.getElementById('cover_image').addEventListener('input', updateImage);
+
+  // Initialise preview from existing values (edit mode)
+  (function init() {
+    const t = document.getElementById('title').value;
+    if (t) previewTitle.textContent = t;
+    const cat = document.getElementById('category');
+    if (cat.selectedIndex > 0) previewCategory.textContent = cat.options[cat.selectedIndex].text;
+    updateTime();
+    updateImage();
+  })();
+</script>
+{% endblock %}

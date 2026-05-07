@@ -1,0 +1,40 @@
+<nav class="navbar navbar-expand-lg sticky-top" style="background:#123d2b;">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-white" href="{{ url_for('landing') }}">
+      <span style="color:#f2a900;">Naija</span>Cipe
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon" style="filter:invert(1);"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{{ url_for('browse') }}">Recipes</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{{ url_for('stores') }}">Stores</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="{{ url_for('about') }}">About</a>
+        </li>
+      </ul>
+      <div class="d-flex gap-2">
+        {% if session.get('logged_in') %}
+          {% if session.get('is_admin') %}
+            <a href="{{ url_for('admin_panel') }}" class="btn btn-sm" style="background:#f2a900;color:#123d2b;font-weight:600;">
+              <i class="bi bi-shield-lock-fill"></i> Admin
+            </a>
+            <a href="{{ url_for('add_recipe') }}" class="btn btn-outline-light btn-sm">
+              <i class="bi bi-plus-lg"></i> Add Recipe
+            </a>
+          {% endif %}
+          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-sm">Dashboard</a>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Log out</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-sm">Log in</a>
+          <a href="{{ url_for('register') }}" class="btn btn-sm" style="background:#f2a900;color:#123d2b;font-weight:600;">Sign up</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>
