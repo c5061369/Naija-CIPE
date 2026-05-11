@@ -15,11 +15,11 @@
 <div class="container py-5">
   {# Mission row #}
   <div class="row g-4">
-    {% for emoji, heading, body in [ ("🎯", "Our mission", "Make authentic
+    {% for emoji, heading, body in [ ("M", "Our mission", "Make authentic
     Nigerian recipes accessible and searchable, with enough detail that a
-    first-time cook can succeed."), ("🌍", "Who it's for", "Diaspora cooks,
+    first-time cook can succeed."), ("W", "Who it's for", "Diaspora cooks,
     curious food lovers, and anyone who wants to cook Nigerian beyond Jollof
-    Rice."), ("⚙️", "Built with", "Python, Flask, SQLite, HTML/CSS, Bootstrap 5.
+    Rice."), ("B", "Built with", "Python, Flask, SQLite, HTML/CSS, Bootstrap 5.
     Everything we've learnt in EFSSD."), ] %}
     <div class="col-md-4 text-center">
       <div class="howit-num">{{ emoji }}</div>
@@ -36,6 +36,12 @@
   <div class="row g-4 justify-content-center">
     {% for member in team %}
     <div class="col-md-3 col-sm-6 text-center">
+      {% if member.image %}
+      <img src="{{ url_for('static', filename=member.image) }}"
+           alt="{{ member.name }}"
+           class="rounded-circle mx-auto mb-2 d-block"
+           style="width:80px; height:80px; object-fit:cover;" />
+      {% else %}
       {% set bg_style = "width:80px; height:80px; font-size:2rem;" %} {% if
       member.avatar_bg == 'gold' %} {% set bg_style = bg_style +
       "background:var(--naija-gold); color:var(--naija-dark);" %} {% elif
@@ -44,6 +50,7 @@
       <div class="review-avatar mx-auto mb-2" style="{{ bg_style }}">
         {{ member.initial }}
       </div>
+      {% endif %}
       <strong>{{ member.name }}</strong><br />
       <small class="text-muted">{{ member.role }}</small>
     </div>

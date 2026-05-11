@@ -303,9 +303,9 @@ def stores():
 @app.route("/about")
 def about():
     team = [
-        {"name": "Ufuoma Akpoguma", "initial": "D",  "avatar_bg": None},
-        {"name": "Damilola Oni",     "initial": "OD", "avatar_bg": "gold"},
-        {"name": "Peter Orji",       "initial": "PO", "avatar_bg": "red"},
+        {"name": "Ufuoma Akpoguma", "initial": "D",  "avatar_bg": None,   "image": "uploads/avatars/UA.jpg"},
+        {"name": "Damilola Oni",     "initial": "OD", "avatar_bg": "gold", "image": "uploads/avatars/DO.jpeg"},
+        {"name": "Peter Orji",       "initial": "PO", "avatar_bg": "red",  "image": "uploads/avatars/PO.jpg"},
     ]
     return render_template("screens/about.html", team=team)
 
