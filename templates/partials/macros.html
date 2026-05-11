@@ -1,0 +1,102 @@
+{# ─────────────────────────────────────────────────────────────
+  Reusable recipe card macro
+  Usage: {% from "partials/macros.html" import recipe_card %}
+         {{ recipe_card(recipe) }}
+───────────────────────────────────────────────────────────── #}
+
+{% macro recipe_card(recipe, show_fav=True) %}
+<a href="{{ url_for('recipe_detail', slug=recipe.slug) }}" class="text-decoration-none d-block h-100">
+<div class="recipe-card h-100" style="cursor:pointer;">
+
+ {% if recipe.cover_image %}
+ <div class="img-placeholder" style="background:none; padding:0; overflow:hidden;">
+   {% if show_fav %}
+   <button class="fav-btn" data-slug="{{ recipe.slug }}" onclick="event.stopPropagation();" aria-label="Save to favourites">
+     <i class="bi bi-heart"></i>
+   </button>
+   {% endif %}
+   <img src="{{ recipe.cover_image }}" alt="{{ recipe.title }}"
+        style="width:100%; height:200px; object-fit:cover; display:block;">
+   <span class="time-badge">
+     <i class="bi bi-clock"></i> {{ recipe.time }} min
+   </span>
+ </div>
+ {% else %}
+ <div class="img-placeholder {{ recipe.img_class }}" data-label="{{ recipe.label }}">
+   {% if show_fav %}
+   <button class="fav-btn" data-slug="{{ recipe.slug }}" onclick="event.stopPropagation();" aria-label="Save to favourites">
+     <i class="bi bi-heart"></i>
+   </button>
+   {% endif %}
+   <span class="time-badge">
+     <i class="bi bi-clock"></i> {{ recipe.time }} min
+   </span>
+ </div>
+ {% endif %}
+
+ <div class="body">
+   <span class="category-tag">{{ recipe.category }}</span>
+   <h5>{{ recipe.title }}</h5>
+   <div class="card-meta">
+     <span class="stars">
+       <i class="bi bi-star-fill"></i> {{ recipe.rating }}
+       {% if recipe.reviews is defined %}<span class="text-muted">({{ recipe.reviews }})</span>{% endif %}
+     </span>
+     <span class="badge badge-diff-{{ recipe.difficulty | lower | replace(' ','') }}">
+       {{ recipe.difficulty }}
+     </span>
+   </div>
+ </div>
+</div>
+</a>
+{% endmacro %}
+
+
+{# ─────────────────────────────────────────────────────────────
+  Star rating display macro
+  Usage: {{ star_rating(4.5) }}
+───────────────────────────────────────────────────────────── #}
+{% macro star_rating(rating, max=5) %}
+ {% set full  = rating | int %}
+ {% set half  = 1 if (rating - full) >= 0.4 else 0 %}
+ {% set empty = max - full - half %}
+ <span class="stars">
+   {% for i in range(full)  %}<i class="bi bi-star-fill"></i>{% endfor %}
+   {% for i in range(half)  %}<i class="bi bi-star-half"></i>{% endfor %}
+   {% for i in range(empty) %}<i class="bi bi-star"></i>{% endfor %}
+   {{ rating }}
+ </span>
+{% endmacro %}
+
+
+{# ─────────────────────────────────────────────────────────────
+  Dashboard tab-nav macro (shared across user sub-pages)
+───────────────────────────────────────────────────────────── #}
+{% macro dashboard_tabs(active) %}
+<ul class="nav nav-tabs nav-tabs-naija mb-4">
+ <li class="nav-item">
+   <a class="nav-link {% if active == 'overview' %}active{% endif %}"
+      href="{{ url_for('dashboard') }}">
+     <i class="bi bi-speedometer2"></i> Overview
+   </a>
+ </li>
+ <li class="nav-item">
+   <a class="nav-link {% if active == 'favourites' %}active{% endif %}"
+      href="{{ url_for('favourites') }}">
+     <i class="bi bi-heart"></i> My Favourites
+   </a>
+ </li>
+ <li class="nav-item">
+   <a class="nav-link {% if active == 'reviews' %}active{% endif %}"
+      href="{{ url_for('my_reviews') }}">
+     <i class="bi bi-chat"></i> My Reviews
+   </a>
+ </li>
+ <li class="nav-item">
+   <a class="nav-link {% if active == 'settings' %}active{% endif %}"
+      href="{{ url_for('user_settings') }}">
+     <i class="bi bi-gear"></i> Settings
+   </a>
+ </li>
+</ul>
+{% endmacro %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}404 — Recipe Not Found{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+  <div style="padding: 5rem 0;">
+    <h1 class="display-font" style="font-size: 8rem; color: var(--naija-gold); margin:0;">404</h1>
+    <h2 class="mb-3">Recipe not found</h2>
+    <p class="text-muted">Looks like this dish went off the menu. Let's get you back to the kitchen.</p>
+    <div class="mt-4 d-flex gap-2 justify-content-center">
+      <a class="btn btn-naija" href="{{ url_for('landing') }}">
+        <i class="bi bi-house-door"></i> Back home
+      </a>
+      <a class="btn btn-naija-outline" href="{{ url_for('browse') }}">Browse recipes</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

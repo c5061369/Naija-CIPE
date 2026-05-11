@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import recipe_card %}
+
+{% block title %}Browse Recipes{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  {# Breadcrumb #}
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb" style="font-size:.88rem;">
+      <li class="breadcrumb-item">
+        <a href="{{ url_for('landing') }}" style="color:var(--naija-green);">Home</a>
+      </li>
+      <li class="breadcrumb-item active">Recipes</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="mb-1">All Recipes</h2>
+      <small class="text-muted">
+        Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }}–
+        {{ [pagination.page * pagination.per_page, total] | min }} of {{ total }} recipes
+      </small>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <span class="text-muted small">Sort:</span>
+      <select class="form-select form-select-sm" style="width:auto;"
+              onchange="window.location='?sort=' + this.value">
+        <option value="popular"  {% if sort_by == 'popular'  %}selected{% endif %}>Most popular</option>
+        <option value="newest"   {% if sort_by == 'newest'   %}selected{% endif %}>Newest first</option>
+        <option value="rated"    {% if sort_by == 'rated'    %}selected{% endif %}>Highest rated</option>
+        <option value="quickest" {% if sort_by == 'quickest' %}selected{% endif %}>Quickest to cook</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    {# Sidebar filters #}
+    <div class="col-lg-3">
+      <form method="GET" action="{{ url_for('browse') }}">
+        <div class="filter-sidebar">
+          <h6 class="mb-3">Search</h6>
+          <div class="input-group mb-4">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" name="q" placeholder="Jollof, egusi…"
+                   value="{{ request.args.get('q', '') }}">
+          </div>
+
+          <h6>Category</h6>
+          <div class="mb-4">
+            {% for cat in categories %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="cat"
+                     id="cat-{{ loop.index }}" value="{{ cat.name }}"
+                     {% if cat.name in request.args.getlist('cat') %}checked{% endif %}>
+              <label class="form-check-label" for="cat-{{ loop.index }}">{{ cat.name }}</label>
+            </div>
+            {% endfor %}
+          </div>
+
+          <h6>Difficulty</h6>
+          <div class="mb-4">
+            {% for diff in ["Easy","Medium","Hard"] %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="diff"
+                     id="diff-{{ loop.index }}" value="{{ diff }}"
+                     {% if diff in request.args.getlist('diff') %}checked{% endif %}>
+              <label class="form-check-label" for="diff-{{ loop.index }}">{{ diff }}</label>
+            </div>
+            {% endfor %}
+          </div>
+
+          <h6>Total time (max minutes)</h6>
+          <div class="mb-4">
+            <input type="range" class="form-range" name="time" min="10" max="180"
+                   value="{{ request.args.get('time', 180) }}">
+            <div class="d-flex justify-content-between">
+              <small>10 min</small><small>3 hrs</small>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-naija w-100">Apply Filters</button>
+          <a href="{{ url_for('browse') }}" class="btn btn-link w-100 mt-2"
+             style="color:#6c757d; font-size:.85rem;">Clear all</a>
+        </div>
+      </form>
+    </div>
+
+    {# Recipe grid #}
+    <div class="col-lg-9">
+      <div class="row g-3">
+        {% for recipe in recipes %}
+        <div class="col-md-4 col-sm-6">
+          {{ recipe_card(recipe) }}
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+          <i class="bi bi-search fs-1 text-muted"></i>
+          <p class="mt-3 text-muted">No recipes match your filters. Try adjusting the search.</p>
+          <a class="btn btn-naija-outline" href="{{ url_for('browse') }}">Clear filters</a>
+        </div>
+        {% endfor %}
+      </div>
+
+      {# Pagination #}
+      {% if pagination and pagination.pages > 1 %}
+      <nav class="mt-5" aria-label="Recipe pages">
+        <ul class="pagination justify-content-center">
+          <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link"
+               href="?page={{ pagination.prev_num }}&sort={{ sort_by }}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+          {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+              <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                <a class="page-link"
+                   {% if page_num == pagination.page %}style="background:var(--naija-green);border-color:var(--naija-green);"{% endif %}
+                   href="?page={{ page_num }}&sort={{ sort_by }}">{{ page_num }}</a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+          <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="?page={{ pagination.next_num }}&sort={{ sort_by }}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
