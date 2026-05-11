@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: naija-cipe
+    env: python
+    buildCommand: pip install -r requirements.txt && mkdir -p instance && python init_db.py
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        value: sqlite:///instance/naija_cipe.db
+      - key: SECRET_KEY
+        generateValue: true
