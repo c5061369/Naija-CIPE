@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Sheffield Stores{% endblock %}
+
+{% block content %}
+
+{# Hero #}
+<div class="hero" style="padding: 3rem 0 2rem;">
+  <div class="container text-center">
+    <span class="hero-badge">LOCAL INGREDIENTS GUIDE</span>
+    <h1>Where to shop in Sheffield</h1>
+    <p class="lead mx-auto mt-3" style="max-width:680px;">
+      A community-curated list of Nigerian &amp; African grocery stores around Sheffield that stock
+      everything you need — from egusi and ogbono to fresh yam, palm oil, stockfish, and scotch bonnet peppers.
+    </p>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  {# Filter bar #}
+  <form method="GET" action="{{ url_for('stores') }}" class="form-wrap mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label small fw-semibold">Search stores</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" name="q"
+                 placeholder="e.g. 'egusi', 'yam', or store name…"
+                 value="{{ request.args.get('q', '') }}">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Area</label>
+        <select class="form-select" name="area">
+          <option>All Sheffield areas</option>
+          {% for area in ["City Centre","London Road (S2)","Spital Hill (S4)","Abbeydale Road (S7)","Moor Market","Online / Delivery"] %}
+          <option {% if request.args.get('area') == area %}selected{% endif %}>{{ area }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-semibold">Sort by</label>
+        <select class="form-select" name="sort">
+          <option>Nearest</option>
+          <option>Top rated</option>
+          <option>A–Z</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-naija"><i class="bi bi-funnel"></i> Apply</button>
+      </div>
+    </div>
+  </form>
+
+  {# Summary bar #}
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+      <h4 class="mb-0">Showing {{ stores | length }} stores</h4>
+      <small class="text-muted">Last updated April 2026 · Community verified</small>
+    </div>
+    <div class="btn-group btn-group-sm" role="group">
+      <button type="button" class="btn btn-naija active"><i class="bi bi-grid-3x3-gap"></i> Grid</button>
+      <button type="button" class="btn btn-naija-outline"><i class="bi bi-geo-alt"></i> Map view</button>
+      <button type="button" class="btn btn-naija-outline"><i class="bi bi-list-ul"></i> List</button>
+    </div>
+  </div>
+
+  {# Store cards #}
+  <div class="row g-4">
+    {% for store in stores %}
+    <div class="col-md-6 col-lg-4">
+      <div class="recipe-card h-100">
+        <div class="recipe-img" style="background: {{ store.bg }}; position:relative; height:120px;">
+          {% if store.featured %}
+          <span class="position-absolute top-0 start-0 m-2 badge"
+                style="background:var(--naija-gold); color:var(--naija-dark);">
+            <i class="bi bi-star-fill"></i> Featured
+          </span>
+          {% endif %}
+          {% if store.verified %}
+          <span class="position-absolute top-0 end-0 m-2 badge bg-success">
+            <i class="bi bi-check-circle-fill"></i> Verified
+          </span>
+          {% endif %}
+          <div style="position:absolute; bottom:10px; left:12px; color:#fff;
+                      font-family:'Playfair Display',serif; font-size:1.4rem;
+                      font-weight:700; text-shadow: 0 2px 8px rgba(0,0,0,.4);">
+            {{ store.short_name }}
+          </div>
+        </div>
+
+        <div class="body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="mb-0">{{ store.name }}</h5>
+            <span class="badge bg-light text-dark">
+              <i class="bi bi-star-fill text-warning"></i> {{ store.rating }}
+            </span>
+          </div>
+          <p class="text-muted small mb-2">
+            <i class="bi bi-geo-alt-fill"></i>
+            {{ store.area }} · {{ store.delivery }}
+          </p>
+          <p class="small mb-2">
+            <strong>Specialties:</strong> {{ store.specialties }}
+          </p>
+          <div class="mb-3">
+            {% for st in store.tags %}
+            <span class="badge rounded-pill bg-light text-dark me-1">{{ st }}</span>
+            {% endfor %}
+          </div>
+          <div class="d-flex gap-2">
+            {% if store.website %}
+            <a href="{{ store.website }}" target="_blank" rel="noopener"
+               class="btn btn-sm btn-naija flex-fill">
+              <i class="bi bi-globe"></i> Website
+            </a>
+            {% else %}
+            <button class="btn btn-sm btn-naija flex-fill">
+              <i class="bi bi-telephone"></i> Call store
+            </button>
+            {% endif %}
+            <button class="btn btn-sm btn-naija-outline">
+              <i class="bi bi-geo-alt"></i> Directions
+            </button>
+          </div>
+          {% if not store.verified %}
+          <small class="text-muted d-block mt-2">
+            <i class="bi bi-info-circle"></i> Community listing — please verify before visiting.
+          </small>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# Ingredients cheat sheet #}
+  <div class="form-wrap mt-5" style="background: var(--naija-cream); border-color: var(--naija-gold);">
+    <div class="row g-4 align-items-center">
+      <div class="col-md-8">
+        <h4 class="mb-2">
+          <i class="bi bi-basket3-fill text-warning"></i> Hard-to-find ingredients cheat sheet
+        </h4>
+        <p class="mb-0 small">
+          Most Sheffield stores above stock these pantry essentials for Nigerian cooking:
+          <strong>egusi (melon seeds), ogbono, palm oil, stockfish, crayfish, locust bean (iru), bitter leaf,
+          uziza, ehuru, dry pepper, scotch bonnets, plantain, yam, cocoyam, ugwu, garri,
+          fufu flour &amp; pounded yam flour.</strong>
+        </p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <button class="btn btn-gold"><i class="bi bi-download"></i> Print shopping list</button>
+      </div>
+    </div>
+  </div>
+
+  {# Community CTA #}
+  <div class="text-center mt-5 py-4" style="border-top: 1px dashed var(--naija-gray-200);">
+    <h5 class="mb-2"><i class="bi bi-plus-circle-fill text-success"></i> Know a store we missed?</h5>
+    <p class="text-muted mb-3">
+      Help fellow cooks in Sheffield. Suggest a Nigerian or African grocery store to add to this list.
+    </p>
+    <button class="btn btn-naija"><i class="bi bi-shop-window"></i> Submit a store</button>
+  </div>
+
+</div>
+{% endblock %}
